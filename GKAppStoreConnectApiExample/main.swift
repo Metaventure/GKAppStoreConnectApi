@@ -14,7 +14,7 @@ print("Hello, World!")
 let dispatchGroup = DispatchGroup()
 
 dispatchGroup.enter()
-GKAppStoreConnectApi.shared.loginWith(username: tetUsername, password: testPassword) { (loggedIn, needs2FA, info, error) in
+GKAppStoreConnectApi.shared.loginWith(username: testUsername, password: testPassword) { (loggedIn, needs2FA, info, error) in
     if error != nil {
         print(error!)
     }

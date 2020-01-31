@@ -13,7 +13,7 @@
 		9625AA6E23E18E750005265D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6D23E18E750005265D /* main.swift */; };
 		9625AA8E23E1909B0005265D /* GKAppStoreConnectApi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; };
 		9625AA8F23E1909B0005265D /* GKAppStoreConnectApi.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9630991323E46D54005872E7 /* TestCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9630991223E46D54005872E7 /* TestCredentials.swift */; };
+		9630991523E46EC3005872E7 /* TestCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9630991423E46EC3005872E7 /* TestCredentials.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +57,7 @@
 		9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GKAppStoreConnectApi.swift; sourceTree = "<group>"; };
 		9625AA6B23E18E750005265D /* GKAppStoreConnectApiExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GKAppStoreConnectApiExample; sourceTree = BUILT_PRODUCTS_DIR; };
 		9625AA6D23E18E750005265D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		9630991223E46D54005872E7 /* TestCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCredentials.swift; sourceTree = "<group>"; };
+		9630991423E46EC3005872E7 /* TestCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCredentials.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				9625AA6D23E18E750005265D /* main.swift */,
-				9630991223E46D54005872E7 /* TestCredentials.swift */,
+				9630991423E46EC3005872E7 /* TestCredentials.swift */,
 			);
 			path = GKAppStoreConnectApiExample;
 			sourceTree = "<group>";
@@ -238,7 +238,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9630991323E46D54005872E7 /* TestCredentials.swift in Sources */,
+				9630991523E46EC3005872E7 /* TestCredentials.swift in Sources */,
 				9625AA6E23E18E750005265D /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

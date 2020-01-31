@@ -8,12 +8,56 @@
 
 /* Begin PBXBuildFile section */
 		9625AA5D23E08A320005265D /* GKAppStoreConnectApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9625AA6423E08A560005265D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6323E08A560005265D /* Models.swift */; };
+		9625AA6623E08D370005265D /* GKAppStoreConnectApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */; };
+		9625AA6E23E18E750005265D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6D23E18E750005265D /* main.swift */; };
+		9625AA8E23E1909B0005265D /* GKAppStoreConnectApi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; };
+		9625AA8F23E1909B0005265D /* GKAppStoreConnectApi.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9630991323E46D54005872E7 /* TestCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9630991223E46D54005872E7 /* TestCredentials.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9625AA9023E1909B0005265D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9625AA4F23E08A320005265D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9625AA5723E08A320005265D;
+			remoteInfo = GKAppStoreConnectApi;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9625AA6923E18E750005265D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		9625AA9223E1909B0005265D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9625AA8F23E1909B0005265D /* GKAppStoreConnectApi.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GKAppStoreConnectApi.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GKAppStoreConnectApi.h; sourceTree = "<group>"; };
 		9625AA5C23E08A320005265D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9625AA6323E08A560005265D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GKAppStoreConnectApi.swift; sourceTree = "<group>"; };
+		9625AA6B23E18E750005265D /* GKAppStoreConnectApiExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GKAppStoreConnectApiExample; sourceTree = BUILT_PRODUCTS_DIR; };
+		9625AA6D23E18E750005265D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		9630991223E46D54005872E7 /* TestCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCredentials.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -24,6 +68,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9625AA6823E18E750005265D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9625AA8E23E1909B0005265D /* GKAppStoreConnectApi.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -31,7 +83,9 @@
 			isa = PBXGroup;
 			children = (
 				9625AA5A23E08A320005265D /* GKAppStoreConnectApi */,
+				9625AA6C23E18E750005265D /* GKAppStoreConnectApiExample */,
 				9625AA5923E08A320005265D /* Products */,
+				9625AA7223E18E870005265D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -39,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */,
+				9625AA6B23E18E750005265D /* GKAppStoreConnectApiExample */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -47,9 +102,27 @@
 			isa = PBXGroup;
 			children = (
 				9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */,
+				9625AA6323E08A560005265D /* Models.swift */,
+				9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */,
 				9625AA5C23E08A320005265D /* Info.plist */,
 			);
 			path = GKAppStoreConnectApi;
+			sourceTree = "<group>";
+		};
+		9625AA6C23E18E750005265D /* GKAppStoreConnectApiExample */ = {
+			isa = PBXGroup;
+			children = (
+				9625AA6D23E18E750005265D /* main.swift */,
+				9630991223E46D54005872E7 /* TestCredentials.swift */,
+			);
+			path = GKAppStoreConnectApiExample;
+			sourceTree = "<group>";
+		};
+		9625AA7223E18E870005265D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -84,16 +157,40 @@
 			productReference = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		9625AA6A23E18E750005265D /* GKAppStoreConnectApiExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9625AA6F23E18E750005265D /* Build configuration list for PBXNativeTarget "GKAppStoreConnectApiExample" */;
+			buildPhases = (
+				9625AA6723E18E750005265D /* Sources */,
+				9625AA6823E18E750005265D /* Frameworks */,
+				9625AA6923E18E750005265D /* CopyFiles */,
+				9625AA9223E1909B0005265D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9625AA9123E1909B0005265D /* PBXTargetDependency */,
+			);
+			name = GKAppStoreConnectApiExample;
+			productName = GKAppStoreConnectApiExample;
+			productReference = 9625AA6B23E18E750005265D /* GKAppStoreConnectApiExample */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		9625AA4F23E08A320005265D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1130;
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = Gikken;
 				TargetAttributes = {
 					9625AA5723E08A320005265D = {
+						CreatedOnToolsVersion = 11.3.1;
+						LastSwiftMigration = 1130;
+					};
+					9625AA6A23E18E750005265D = {
 						CreatedOnToolsVersion = 11.3.1;
 					};
 				};
@@ -112,6 +209,7 @@
 			projectRoot = "";
 			targets = (
 				9625AA5723E08A320005265D /* GKAppStoreConnectApi */,
+				9625AA6A23E18E750005265D /* GKAppStoreConnectApiExample */,
 			);
 		};
 /* End PBXProject section */
@@ -131,10 +229,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9625AA6423E08A560005265D /* Models.swift in Sources */,
+				9625AA6623E08D370005265D /* GKAppStoreConnectApi.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9625AA6723E18E750005265D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9630991323E46D54005872E7 /* TestCredentials.swift in Sources */,
+				9625AA6E23E18E750005265D /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9625AA9123E1909B0005265D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9625AA5723E08A320005265D /* GKAppStoreConnectApi */;
+			targetProxy = 9625AA9023E1909B0005265D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9625AA5E23E08A320005265D /* Debug */ = {
@@ -260,6 +377,7 @@
 		9625AA6123E08A320005265D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 86XZXYRY9F;
@@ -267,7 +385,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = GKAppStoreConnectApi/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -276,6 +394,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.AppStoreConnectApi.GKAppStoreConnectApi;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos watchos watchsimulator appletvos appletvsimulator macosx";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -284,6 +404,7 @@
 		9625AA6223E08A320005265D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 86XZXYRY9F;
@@ -291,7 +412,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = GKAppStoreConnectApi/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -300,8 +421,35 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.AppStoreConnectApi.GKAppStoreConnectApi;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos watchos watchsimulator appletvos appletvsimulator macosx";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9625AA7023E18E750005265D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 86XZXYRY9F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9625AA7123E18E750005265D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 86XZXYRY9F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -322,6 +470,15 @@
 			buildConfigurations = (
 				9625AA6123E08A320005265D /* Debug */,
 				9625AA6223E08A320005265D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9625AA6F23E18E750005265D /* Build configuration list for PBXNativeTarget "GKAppStoreConnectApiExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9625AA7023E18E750005265D /* Debug */,
+				9625AA7123E18E750005265D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

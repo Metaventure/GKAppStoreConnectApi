@@ -9,8 +9,6 @@
 import Foundation
 import GKAppStoreConnectApi
 
-print("Hello, World!")
-
 let dispatchGroup = DispatchGroup()
 
 dispatchGroup.enter()

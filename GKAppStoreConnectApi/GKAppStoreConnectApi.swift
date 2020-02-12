@@ -153,9 +153,12 @@ public class GKAppStoreConnectApi {
                                         completionHandler(false, false, nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
                                         return
                                     }
-                                    
+//                                    print(dict)
                                     let trustedDevices = dict["trustedDevices"] as? [String: Any] ?? [String: Any]()
-                                    let trustedPhoneNumbers = dict["trustedPhoneNumbers"] as? [String: Any] ?? [String: Any]()
+                                    var trustedPhoneNumbers = dict["trustedPhoneNumbers"] as? [[String: Any]] ?? [[String: Any]]()
+                                    trustedPhoneNumbers.sort { (number1, number2) -> Bool in
+                                        return (number1["id"] as? Int ?? 0) < (number2["id"] as? Int ?? 0)
+                                    }
                                     
                                     let noTrustedDevices = trustedDevices.count == 0
                                     
@@ -202,7 +205,7 @@ public class GKAppStoreConnectApi {
                                     {
                                         // code was sent right away
                                         if infoDict["wasTrustedDeviceCode"] as? Bool == false {
-                                            infoDict["resendInfo"] = ["phoneID": trustedPhoneNumber["id"]]
+                                            infoDict["resendInfo"] = ["phoneID": trustedPhoneNumber["id"], "phoneNumber": trustedPhoneNumber["numberWithDialCode"]]
                                         }
                                         
                                         completionHandler(false, true, infoDict, nil)
@@ -271,14 +274,14 @@ public class GKAppStoreConnectApi {
         task.resume()
     }
     
-    func resend2FACodeWith(phoneID: Int, completionHandler: @escaping ((_ resent: Bool, _ error: Error?) -> Void)) {
+    public func resend2FACodeWith(phoneID: Int, completionHandler: @escaping ((_ resent: Bool, _ error: Error?) -> Void)) {
         let body: [String: Any] = [
             "phoneNumber": [
                 "id": phoneID
             ],
             "mode": "sms"
         ]
-        var req = URLRequest(url: URL(string: "https://idmsa.apple.com/appleauth/verify/phone")!)
+        var req = URLRequest(url: URL(string: "https://idmsa.apple.com/appleauth/auth/verify/phone")!)
         req.httpMethod = "PUT"
         req = updateHeadersFor(request: req, additionalFields: [
             "X-Apple-Id-Session-Id": self.tfaAppleIDSessionID ?? "",
@@ -320,7 +323,7 @@ public class GKAppStoreConnectApi {
         }
     }
     
-    func finish2FAWith(code: String, phoneID: Int?, completionHandler: @escaping ((_ loggedIn: Bool, _ info: [String: Any]?, _ error: Error?) -> Void)) {
+    public func finish2FAWith(code: String, phoneID: Int?, completionHandler: @escaping ((_ loggedIn: Bool, _ info: [String: Any]?, _ error: Error?) -> Void)) {
         let url: URL!
         let body: [String: Any]!
         

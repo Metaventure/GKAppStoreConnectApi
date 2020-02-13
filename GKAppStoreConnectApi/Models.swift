@@ -8,45 +8,60 @@
 
 import Foundation
 
-struct ASCApp {
-    var id: String
-    var sku: String
-    var platform: String
+public struct ASCApp {
+    public var id: String
+    public var sku: String
+    public var platform: String
+    public var iconUrl: String
+    public var name: String
 }
 
-struct ASCUser {
-    var personId: String
-    var currentTeamId: String
-    var teams: [ASCTeam]
+public struct ASCUser {
+    public var personId: String
+    public var currentTeamId: String
+    public var teams: [ASCTeam]
 }
 
-struct ASCTeam {
-    var name: String
-    var providerId: Int
-    var apps: [ASCApp]
+public struct ASCTeam {
+    public var name: String
+    public var providerId: Int
+    public var apps: [ASCApp]
 }
 
-struct ASCAppPromoCodesInfo {
-    var version: String
-    var versionId: String
-    var contractFilename: String
-    var codesLeft: Int
+public struct ASCAppPromoCodesInfo {
+    public var version: String
+    public var versionId: Int
+    public var contractFilename: String
+    public var codesLeft: Int
 }
 
-struct ASCAppPromoCode {
-    var code: String
-    var creationDate: Date
-    var expirationDate: Date
-    var requestId: String
-    var platform: String
-    var version: String
+public struct ASCAppInternalPurchase {
+    public var id: String
+    public var name: String
+    public var codesLeft: Int
 }
 
-struct ASCInAppPurchasePromoCode {
-    var code: String
-    var creationDate: Int
-    var expirationDate: Int
-    var requestId: String
+public struct ASCAppPromoCode {
+    public var code: String
+    public var creationDate: Date
+    public var expirationDate: Date
+    public var requestId: String
+    public var platform: String
+    public var version: String
+}
+
+public struct ASCIapPromoCode {
+    public var code: String
+    public var creationDate: Date
+    public var expirationDate: Date
+    public var requestId: String
+}
+
+public struct ASCInAppPurchasePromoCode {
+    public var code: String
+    public var creationDate: Int
+    public var expirationDate: Int
+    public var requestId: String
 }
 
 enum GKASCAPIErrorCode: Int {
@@ -58,6 +73,7 @@ enum GKASCAPIErrorCode: Int {
     case tooManyCodesValidated = 6
     case codeNotLoggedIn = 7
     case badJson = 8
+    case teamNotSelected = 9
 }
 
 let GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN = "co.gikken.PromoCodes.AppStoreConnectLogin"

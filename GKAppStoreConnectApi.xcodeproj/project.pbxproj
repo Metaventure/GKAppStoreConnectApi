@@ -13,7 +13,7 @@
 		9625AA6E23E18E750005265D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6D23E18E750005265D /* main.swift */; };
 		9625AA8E23E1909B0005265D /* GKAppStoreConnectApi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; };
 		9625AA8F23E1909B0005265D /* GKAppStoreConnectApi.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9630991523E46EC3005872E7 /* TestCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9630991423E46EC3005872E7 /* TestCredentials.swift */; };
+		96BBAC0223F56B800034B6BC /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBABFF23F5685B0034B6BC /* SwiftyJSON.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +57,7 @@
 		9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GKAppStoreConnectApi.swift; sourceTree = "<group>"; };
 		9625AA6B23E18E750005265D /* GKAppStoreConnectApiExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GKAppStoreConnectApiExample; sourceTree = BUILT_PRODUCTS_DIR; };
 		9625AA6D23E18E750005265D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		9630991423E46EC3005872E7 /* TestCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCredentials.swift; sourceTree = "<group>"; };
+		96BBABFF23F5685B0034B6BC /* SwiftyJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */,
+				96BBAC0123F568880034B6BC /* Dependencies */,
 				9625AA6323E08A560005265D /* Models.swift */,
 				9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */,
 				9625AA5C23E08A320005265D /* Info.plist */,
@@ -113,7 +114,6 @@
 			isa = PBXGroup;
 			children = (
 				9625AA6D23E18E750005265D /* main.swift */,
-				9630991423E46EC3005872E7 /* TestCredentials.swift */,
 			);
 			path = GKAppStoreConnectApiExample;
 			sourceTree = "<group>";
@@ -123,6 +123,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		96BBAC0123F568880034B6BC /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				96BBABFF23F5685B0034B6BC /* SwiftyJSON.swift */,
+			);
+			path = Dependencies;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -229,6 +237,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96BBAC0223F56B800034B6BC /* SwiftyJSON.swift in Sources */,
 				9625AA6423E08A560005265D /* Models.swift in Sources */,
 				9625AA6623E08D370005265D /* GKAppStoreConnectApi.swift in Sources */,
 			);
@@ -238,7 +247,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9630991523E46EC3005872E7 /* TestCredentials.swift in Sources */,
 				9625AA6E23E18E750005265D /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

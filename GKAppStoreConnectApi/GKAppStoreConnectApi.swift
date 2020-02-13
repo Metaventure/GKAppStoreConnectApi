@@ -47,6 +47,18 @@ public class GKAppStoreConnectApi {
      */
     var cachedTeams = [ASCTeam]()
     
+    var currentTeam: ASCTeam? {
+        guard let teamId = currentTeamID, cachedTeams.count > 0 else {
+            return nil
+        }
+        for team in cachedTeams {
+            if team.providerId == teamId {
+                return team
+            }
+        }
+        return nil
+    }
+    
     private static let sharedInstance = GKAppStoreConnectApi()
     
     public static var shared: GKAppStoreConnectApi {
@@ -244,7 +256,7 @@ public class GKAppStoreConnectApi {
                                 return
                             }
                             
-                            if dict["serviceErrors"] == nil {
+                            if dict["serviceErrors"] != nil {
                                 NSLog("*** received an error - possibly login: \(String(describing: dict["serviceErrors"]))")
                                 completionHandler(false, false, nil, error ?? NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
                             }
@@ -424,17 +436,14 @@ public class GKAppStoreConnectApi {
     
     // MARK: - App Retrieval
     
+    public func getApps() -> [ASCApp]? {
+        return self.currentTeam?.apps
+    }
+    
     func appsForTeamWith(providerID: Int, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS, code: GKASCAPIErrorCode.codeNotLoggedIn.rawValue, userInfo: nil))
             return
-        }
-        
-        for team in cachedTeams {
-            if providerID == team.providerId {
-                completionHandler(team.apps, nil)
-                return
-            }
         }
         
         if providerID == self.currentTeamID {
@@ -453,7 +462,7 @@ public class GKAppStoreConnectApi {
     
     // MARK: - Promo Code Info and Creation
     
-    func promoCodeInfoForAppWith(appID: Int, completionHandler: @escaping ((_ info: ASCAppPromoCodesInfo?, _ error: Error?) -> Void)) {
+    public func promoCodeInfoForAppWith(appID: Int, completionHandler: @escaping ((_ info: ASCAppPromoCodesInfo?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.codeNotLoggedIn.rawValue, userInfo: nil))
             return
@@ -480,7 +489,7 @@ public class GKAppStoreConnectApi {
                     let versions = dataDict["versions"] as? [[String: Any]],
                     let chosenDict = versions.first,
                     let version = chosenDict["version"] as? String,
-                    let versionId = chosenDict["id"] as? String,
+                    let versionId = chosenDict["id"] as? Int,
                     let contractFilename = chosenDict["contractFileName"] as? String,
                     let maximumNumberOfCodes = chosenDict["maximumNumberOfCodes"] as? Int,
                     let numberOfCodes = chosenDict["numberOfCodes"] as? Int else {
@@ -505,8 +514,8 @@ public class GKAppStoreConnectApi {
         task.resume()
     }
     
-    func requestPromoCodesForAppWith(appID: Int,
-                                     versionID: String,
+    public func requestPromoCodesForAppWith(appID: Int,
+                                     versionID: Int,
                                      quantity: Int,
                                      contractFilename: String,
                                      completionHandler: @escaping ((_ promoCodes: [ASCAppPromoCode]?, _ error: Error?) -> Void)) {
@@ -515,12 +524,12 @@ public class GKAppStoreConnectApi {
             return
         }
         
-        if appID == 0 || versionID.isEmpty || quantity == 0 || contractFilename.isEmpty {
+        if appID == 0 || quantity == 0 || contractFilename.isEmpty {
             completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.malformedRequest.rawValue, userInfo: nil))
             return
         }
         
-        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/%@/promocodes/versions/")!)
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appID)/promocodes/versions/")!)
         req.httpMethod = "POST"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
@@ -557,6 +566,114 @@ public class GKAppStoreConnectApi {
                         // promo code creation apparently takes a couple of seconds on Apple's servers, so it also takes a little while until they show up in the promo code history
                         // to minimize traffic, we wait 5 seconds after the promo code creation, and then start our recursive polling for the newly created codes.
                         self.recursivelyLoadPromoCodeHistoryForAppWith(appID: appID, creationRequestDate: creationRequestDate, completionHandler: completionHandler)
+                    }
+                    
+                } catch let jsonError {
+                    completionHandler(nil, jsonError)
+                }
+            }
+            task.resume()
+        } catch let jsonError {
+            completionHandler(nil, jsonError)
+        }
+    }
+    
+    // MARK: - IAPs and IAP promo codes
+    
+    public func iapsForAppWith(appId: Int, completionHandler: @escaping ((_ iaps: [ASCAppInternalPurchase]?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn {
+            completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.codeNotLoggedIn.rawValue, userInfo: nil))
+            return
+        }
+        
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps")!)
+        req.httpMethod = "GET"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            guard let _ = response, let data = data, error == nil else {
+                completionHandler(nil, error)
+                return
+            }
+            
+            do {
+                let json = try JSON(data: data)
+                guard let data = json["data"].array else {
+                    completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
+                    return
+                }
+                
+                var iaps = [ASCAppInternalPurchase]()
+                
+                for inAppPurchaseJson in data {
+                    let adamId = inAppPurchaseJson["adamId"].stringValue
+                    let name = inAppPurchaseJson["referenceName"].stringValue
+                    let maximumNumberOfCodes = inAppPurchaseJson["maximumNumberOfCodes"].intValue
+                    let numberOfCodes = inAppPurchaseJson["numberOfCodes"].intValue
+                    
+                    iaps.append(ASCAppInternalPurchase(id: adamId, name: name, codesLeft: maximumNumberOfCodes - numberOfCodes))
+                }
+                
+                completionHandler(iaps, nil)
+            } catch let jsonError {
+                completionHandler(nil, jsonError)
+            }
+        }
+        task.resume()
+    }
+    
+    public func requestIapPromoCodesFor(iapID: Int,
+                                        appID: Int,
+                                     quantity: Int,
+                                     completionHandler: @escaping ((_ promoCodes: [ASCIapPromoCode]?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn {
+            completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.codeNotLoggedIn.rawValue, userInfo: nil))
+            return
+        }
+        
+        if iapID == 0 || appID == 0 || quantity == 0 {
+            completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.malformedRequest.rawValue, userInfo: nil))
+            return
+        }
+        
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appID)/promocodes/iaps")!)
+        req.httpMethod = "POST"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        let jsonArray: [[String: Any]] = [
+            [
+                "numberOfCodes": quantity,
+                "agreedToContract": true,
+                "adamId": iapID
+            ]
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonArray, options: [])
+            req.httpBody = jsonData
+            
+            let creationRequestDate = Date(timeIntervalSinceNow: -1)
+            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+                guard let _ = response, let data = data, error == nil else {
+                    completionHandler(nil, error)
+                    return
+                }
+                
+                do {
+                    guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                        let dataDict = dict["data"] as? [String: Any],
+                        let successfulArray = dataDict["successful"] as? [Any],
+                        successfulArray.count > 0 else {
+                        completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
+                        return
+                    }
+                    
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
+                        // promo code creation apparently takes a couple of seconds on Apple's servers, so it also takes a little while until they show up in the promo code history
+                        // to minimize traffic, we wait 5 seconds after the promo code creation, and then start our recursive polling for the newly created codes.
+                        self.recursivelyLoadIapPromoCodeHistoryForAppWith(appID: appID, creationRequestDate: creationRequestDate, completionHandler: completionHandler)
                     }
                     
                 } catch let jsonError {
@@ -620,6 +737,9 @@ public class GKAppStoreConnectApi {
             }
             
             self.cachedTeams = teams
+            
+            self.currentTeamID = (sessionDict["provider"] as? [String: Any])?["providerId"] as? Int
+            self.personID = (sessionDict["user"] as? [String: Any])?["prsId"] as? String
             
             if self.currentTeamID != nil {
                 self.appsForTeamWith(providerID: self.currentTeamID!) { (apps, error) in
@@ -778,11 +898,13 @@ public class GKAppStoreConnectApi {
                     
                     let adamId = dict["adamId"] as? String ?? ""
                     let sku = dict["vendorId"] as? String ?? ""
+                    let name = dict["name"] as? String ?? ""
+                    let iconUrl = dict["iconUrl"] as? String ?? ""
                     
                     // TODO: Looks like the app is missing a name at this point
                     
                     if !adamId.isEmpty {
-                        apps.append(ASCApp(id: adamId, sku: sku, platform: platform))
+                        apps.append(ASCApp(id: adamId, sku: sku, platform: platform, iconUrl: iconUrl, name: name))
                     }
                 }
                 
@@ -866,6 +988,61 @@ public class GKAppStoreConnectApi {
         }
     }
     
+    func recursivelyLoadIapPromoCodeHistoryForAppWith(appID: Int, creationRequestDate: Date, completionHandler: @escaping ((_ promoCodes: [ASCIapPromoCode]?, _ error: Error?) -> Void)) {
+        let lastRequestDate = Date()
+        self.iapPromoCodeHistoryForAppWith(appID: appID) { (historyDicts, error) in
+            guard let historyDicts = historyDicts,
+                historyDicts.count > 0,
+                error == nil else {
+                    completionHandler(nil, error)
+                    return
+            }
+            
+            var finalCodes = [ASCIapPromoCode]()
+            for codeDict in historyDicts {
+                guard let codes = codeDict["codes"] as? [String],
+                    codes.count > 0,
+                    let creationDateNanoseconds = codeDict["effectiveDate"] as? Int,
+                    let expDateNanoseconds = codeDict["expirationDate"] as? Int else {
+                        continue
+                }
+                
+                let creationDateTimeInterval = TimeInterval(creationDateNanoseconds) / 1000
+                let creationDate = Date(timeIntervalSince1970: creationDateTimeInterval)
+                if creationRequestDate > creationDate {
+                    // these promo codes were created before we requested them here - ignore.
+                    continue
+                }
+                
+                let expDateTimeInterval = TimeInterval(expDateNanoseconds) / 1000
+                let expDate = Date(timeIntervalSince1970: expDateTimeInterval)
+                
+                for code in codes {
+                    let code = code
+                    let requestId = codeDict["id"] as? String ?? ""
+                    
+                    finalCodes.append(ASCIapPromoCode(code: code, creationDate: creationDate, expirationDate: expDate, requestId: requestId))
+                }
+            }
+            
+            if finalCodes.count == 0 {
+                // as to not the "flood" the server with too many requests, at least 'minTimeToHavePassed' seconds have to have passed since the last request. maybe raise that at some point.
+                let minTimeToHavePassed = 10.0
+                var timeLeft = minTimeToHavePassed - Date().timeIntervalSince(lastRequestDate)
+                if timeLeft <= 0 {
+                    timeLeft = 0.01
+                }
+                
+                DispatchQueue.global().asyncAfter(deadline: .now() + timeLeft) {
+                    self.recursivelyLoadIapPromoCodeHistoryForAppWith(appID: appID, creationRequestDate: creationRequestDate, completionHandler: completionHandler)
+                }
+                return
+            }
+            
+            completionHandler(finalCodes, nil)
+        }
+    }
+    
     func promoCodeHistoryForAppWith(appID: Int, completionHandler: @escaping ((_ historyDicts: [[String: Any]]?, _ error: Error?) -> Void)) {
         var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appID)/promocodes/history")!)
         req.httpMethod = "GET"
@@ -882,6 +1059,35 @@ public class GKAppStoreConnectApi {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let dataDict = dict["data"] as? [String: Any],
                     let codeDicts = dataDict["requests"] as? [[String: Any]] else {
+                    completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
+                    return
+                }
+                
+                completionHandler(codeDicts, nil)
+                
+            } catch let jsonError {
+                completionHandler(nil, jsonError)
+            }
+        }
+        task.resume()
+    }
+    
+    func iapPromoCodeHistoryForAppWith(appID: Int, completionHandler: @escaping ((_ historyDicts: [[String: Any]]?, _ error: Error?) -> Void)) {
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appID)/promocodes/iap/history")!)
+        req.httpMethod = "GET"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            guard let _ = response, let data = data, error == nil else {
+                completionHandler(nil, error)
+                return
+            }
+            
+            do {
+                guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                    let dataDict = dict["data"] as? [String: Any],
+                    let codeDicts = dataDict["promoCodeRequests"] as? [[String: Any]] else {
                     completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
                     return
                 }

@@ -160,9 +160,9 @@ public class GKAppStoreConnectApi {
                                         return (number1["id"] as? Int ?? 0) < (number2["id"] as? Int ?? 0)
                                     }
                                     
-                                    let noTrustedDevices = trustedDevices.count == 0
+                                    let noTrustedDevices = dict["noTrustedDevices"] as? Bool ?? false
                                     
-                                    if trustedDevices.count == 0 && trustedPhoneNumbers.count == 0 {
+                                    if (noTrustedDevices || trustedDevices.count == 0) && trustedPhoneNumbers.count == 0 {
                                         completionHandler(false, false, nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
                                     }
                                     

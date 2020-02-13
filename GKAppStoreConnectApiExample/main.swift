@@ -29,19 +29,21 @@ while(true) {
                 
                 if loggedIn {
                     print("Logged in")
+                    proceed = true
                 } else if needs2FA {
                     print("2FA needed")
                     let didSendCode = info?["didSendCode"] as? Bool ?? false
                     let phoneNumber = (info?["resendInfo"] as? [String: Any])?["phoneNumber"] as? String
+                    let usedTrustedDevices = info?["wasTrustedDeviceCode"] as? Bool ?? false
                     var phoneId = (info?["resendInfo"] as? [String: Any])?["phoneID"] as? Int
                     
-                    if didSendCode && phoneNumber == nil {
+                    if didSendCode && (usedTrustedDevices || phoneNumber == nil) {
                         print("Code was sent to your trusted devices")
                     } else if didSendCode && phoneNumber != nil {
                         print("Code was sent to \(phoneNumber!)")
                     }
                     
-                    print("Want to use another phone? y/n")
+                    print("Want to use another option? y/n")
                     let another = readLine() == "y"
                     
                     if !didSendCode || another {
@@ -60,6 +62,9 @@ while(true) {
                         } else {
                             print("error")
                         }
+                    } else if !loggedIn && !needs2FA {
+                        proceed = true
+                        return
                     }
                     
                     print("Enter code:")

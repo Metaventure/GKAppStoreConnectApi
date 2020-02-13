@@ -11,13 +11,19 @@ import GKAppStoreConnectApi
 
 let commands = """
 supported commands:
-login,
-list apps,
-select app [app_id],
-app codes,
-select iap [iap_id],
-iap codes,
-list iaps,
+login
+
+list apps
+list iaps
+list teams
+
+select app [app_id]
+select iap [iap_id]
+select team [team_id]
+
+app codes
+iap codes
+
 exit
 """
 
@@ -55,6 +61,12 @@ func main() {
             else if command == "iap codes" {
                 generateIapCodes()
             }
+            else if command == "list teams" {
+                listTeams()
+            }
+            else if command.starts(with: "select team ") {
+                selectTeam(command: command)
+            }
             else if command == "exit" {
                 exit(EXIT_SUCCESS)
             }
@@ -79,6 +91,7 @@ func logIn() {
         
         if loggedIn {
             print("Logged in")
+            printCurrentTeam()
             proceed = true
         } else if needs2FA {
             print("2FA needed")
@@ -120,6 +133,7 @@ func logIn() {
                 GKAppStoreConnectApi.shared.finish2FAWith(code: code, phoneID: phoneId) { (loggedIn, info, error) in
                     if loggedIn {
                         print("Successfully logged in")
+                        printCurrentTeam()
                     } else {
                         print("Log in failed. Error: \(error?.localizedDescription ?? "")")
                     }
@@ -243,6 +257,47 @@ func generateIapCodes() {
         
         proceed = true
     }
+}
+
+func listTeams() {
+    guard let teams = GKAppStoreConnectApi.shared.getTeams() else {
+        print("No teams")
+        return
+    }
+    
+    for team in teams {
+        print("\(team.providerId): \(team.name)")
+    }
+}
+
+func selectTeam(command: String) {
+    guard let teamId = Int(command.replacingOccurrences(of: "select team ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)) else {
+        return
+    }
+    
+    selectedApp = nil
+    selectedAppInfo = nil
+    selectedIap = nil
+    
+    proceed = false
+    GKAppStoreConnectApi.shared.switchToTeamWith(teamID: teamId) { (success, error) in
+        guard error == nil else {
+            print("Error: \(error?.localizedDescription ?? "unknown")")
+            proceed = true
+            return
+        }
+        printCurrentTeam()
+        proceed = true
+    }
+}
+
+func printCurrentTeam() {
+    guard let team = GKAppStoreConnectApi.shared.currentTeam else {
+        print("No team is selected")
+        return
+    }
+    
+    print("Selected team: \(team.name)")
 }
 
 main()

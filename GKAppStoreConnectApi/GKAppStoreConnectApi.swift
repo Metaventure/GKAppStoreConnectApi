@@ -47,7 +47,13 @@ public class GKAppStoreConnectApi {
      */
     var cachedTeams = [ASCTeam]()
     
-    var currentTeam: ASCTeam? {
+    /*!
+     @property        userSession
+     @abstract        The user session. Cached after login is complete and @c -_loadSessionDataAfterLoginWithCompletionHandler is called. Used to switch teams.
+     */
+    var userSession: [String: Any]?
+    
+    public var currentTeam: ASCTeam? {
         guard let teamId = currentTeamID, cachedTeams.count > 0 else {
             return nil
         }
@@ -451,8 +457,8 @@ public class GKAppStoreConnectApi {
             return
         }
         
-        self.switchToTeamWith(teamID: providerID) { (switched, error) in
-            if !switched || error != nil {
+        self.switchToTeamWith(teamID: providerID) { (sessionInfo, error) in
+            if error != nil {
                 completionHandler(nil, error)
             }
             
@@ -721,6 +727,8 @@ public class GKAppStoreConnectApi {
                 return
             }
             
+            self.userSession = sessionDict
+            
             let teamsArray = sessionDict["availableProviders"] as? [[String: Any]] ?? [[String: Any]]()
             
             var teams = [ASCTeam]()
@@ -795,48 +803,39 @@ public class GKAppStoreConnectApi {
         task.resume()
     }
     
-    func switchToTeamWith(teamID: Int, completionHandler: @escaping ((_ switched: Bool, _ error: Error?) -> Void)) {
-        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/v1/session/webSession")!)
+    public func getTeams() -> [ASCTeam]? {
+        return self.cachedTeams
+    }
+    
+    public func switchToTeamWith(teamID: Int, completionHandler: @escaping ((_ sessionDict: [String: Any]?, _ error: Error?) -> Void)) {
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/olympus/v1/session")!)
         req.httpShouldHandleCookies = true
         req.httpMethod = "POST"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
-        let jsonDict: [String: Any?] = [
-            "contentProviderId": teamID,
-            "dsId": self.personID,
-            "ipAddress": nil
-        ]
+        
+        guard let jsonDict = self.userSession else {
+            completionHandler(nil, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS, code: GKASCAPIErrorCode.codeNotLoggedIn.rawValue, userInfo: nil))
+            return
+        }
         
         do {
-            let body = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-            req.httpBody = body
+            let sessionData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+            
+            var sessionJson = try JSON(data: sessionData)
+            sessionJson["provider"]["providerId"].int = teamID
+            
+            req.httpBody = try sessionJson.rawData()
             
             let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
-                guard let _ = response, let data = data, error == nil else {
-                    completionHandler(false, error)
+                guard let _ = response, let _ = data, error == nil else {
+                    completionHandler(nil, error)
                     return
                 }
-                
-                do {
-                    guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                        let webSessionData = dict["data"] as? [String: Any],
-                        webSessionData.count > 0,
-                        webSessionData["contentProviderId"] != nil,
-                        webSessionData["dsId"] != nil,
-                        webSessionData["statusCode"] as? String == "SUCCESS" else {
-                        completionHandler(false, NSError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS, code: GKASCAPIErrorCode.unexpectedReply.rawValue, userInfo: nil))
-                        return
-                    }
-                    
-                    self.currentTeamID = teamID
-                    
-                    completionHandler(true, nil)
-                } catch let jsonError {
-                    completionHandler(false, jsonError)
-                }
+                self.loadSessionDataAfterLoginWith(completionHandler: completionHandler)
             }
             task.resume()
         } catch let jsonError {
-            completionHandler(false, jsonError)
+            completionHandler(nil, jsonError)
         }
     }
     

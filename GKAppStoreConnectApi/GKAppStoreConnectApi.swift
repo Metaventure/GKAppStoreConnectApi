@@ -242,7 +242,7 @@ public class GKAppStoreConnectApi {
                             }
                             
                             task.resume()
-                        } else if responseCode != 401 {
+                        } else if responseCode == 401 {
                             // Wrong password or email
                             completionHandler(false, false, nil, error ?? BadCredentialsError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
                             return

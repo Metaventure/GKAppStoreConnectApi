@@ -143,11 +143,11 @@ public struct BadTwoFactorCodeError: LocalizedError {
 }
 
 public struct BadCredentialsError: LocalizedError {
-    var title: String? = "Wrong username or password"
-    var code = GKASCAPIErrorCode.badCredentials
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+    public var title: String? = "Wrong username or password"
+    public var code = GKASCAPIErrorCode.badCredentials
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain

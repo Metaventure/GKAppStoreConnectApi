@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum GKASCAPIErrorCode: Int {
+public enum GKASCAPIErrorCode: Int {
     case malformedRequest = 1
     case serviceKeyMissing = 2
     case unexpectedReply = 3
@@ -22,127 +22,127 @@ enum GKASCAPIErrorCode: Int {
     case badCredentials = 11
 }
 
-struct MalformedRequestError: LocalizedError {
-    var title: String? = "User Cancelled"
-    var code = GKASCAPIErrorCode.malformedRequest
-    var errorDescription: String?
-    var failureReason: String?
-    var domain: String?
+public struct MalformedRequestError: LocalizedError {
+    public var title: String? = "User Cancelled"
+    public var code = GKASCAPIErrorCode.malformedRequest
+    public var errorDescription: String?
+    public var failureReason: String?
+    public var domain: String?
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct ServiceKeyMissingError: LocalizedError {
-    var title: String? = "Service key missing"
-    var code = GKASCAPIErrorCode.serviceKeyMissing
-    var errorDescription: String?
-    var failureReason: String?
-    var domain: String?
+public struct ServiceKeyMissingError: LocalizedError {
+    public var title: String? = "Service key missing"
+    public var code = GKASCAPIErrorCode.serviceKeyMissing
+    public var errorDescription: String?
+    public var failureReason: String?
+    public var domain: String?
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct UnexpectedReplyError: LocalizedError {
-    var title: String? = "Unexpected reply"
-    var code = GKASCAPIErrorCode.unexpectedReply
-    var errorDescription: String?
-    var failureReason: String?
-    var domain: String?
+public struct UnexpectedReplyError: LocalizedError {
+    public var title: String? = "Unexpected reply"
+    public var code = GKASCAPIErrorCode.unexpectedReply
+    public var errorDescription: String?
+    public var failureReason: String?
+    public var domain: String?
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct SecurityCodeLockedError: LocalizedError {
-    var title: String? = "Security code locked"
-    var code = GKASCAPIErrorCode.securityCodeLocked
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct SecurityCodeLockedError: LocalizedError {
+    public var title: String? = "Security code locked"
+    public var code = GKASCAPIErrorCode.securityCodeLocked
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct TooManyCodesSentError: LocalizedError {
-    var title: String? = "Too many codes sent"
-    var code = GKASCAPIErrorCode.tooManyCodesSent
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct TooManyCodesSentError: LocalizedError {
+    public var title: String? = "Too many codes sent"
+    public var code = GKASCAPIErrorCode.tooManyCodesSent
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct TooManyCodesValidatedError: LocalizedError {
-    var title: String? = "Too many codes validated"
-    var code = GKASCAPIErrorCode.tooManyCodesValidated
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct TooManyCodesValidatedError: LocalizedError {
+    public var title: String? = "Too many codes validated"
+    public var code = GKASCAPIErrorCode.tooManyCodesValidated
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct NotLoggedInError: LocalizedError {
-    var title: String? = "Not logged in"
-    var code = GKASCAPIErrorCode.codeNotLoggedIn
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct NotLoggedInError: LocalizedError {
+    public var title: String? = "Not logged in"
+    public var code = GKASCAPIErrorCode.codeNotLoggedIn
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct BadJsonError: LocalizedError {
-    var title: String? = "Bad JSON"
-    var code = GKASCAPIErrorCode.badJson
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct BadJsonError: LocalizedError {
+    public var title: String? = "Bad JSON"
+    public var code = GKASCAPIErrorCode.badJson
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct TeamNotSelected: LocalizedError {
-    var title: String? = "Team not selected"
-    var code = GKASCAPIErrorCode.teamNotSelected
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct TeamNotSelected: LocalizedError {
+    public var title: String? = "Team not selected"
+    public var code = GKASCAPIErrorCode.teamNotSelected
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct BadTwoFactorCodeError: LocalizedError {
-    var title: String? = "Bad 2FA code"
-    var code = GKASCAPIErrorCode.badTwoFactorCode
-    var errorDescription: String? = nil
-    var failureReason: String? = nil
-    var domain: String? = nil
+public struct BadTwoFactorCodeError: LocalizedError {
+    public var title: String? = "Bad 2FA code"
+    public var code = GKASCAPIErrorCode.badTwoFactorCode
+    public var errorDescription: String? = nil
+    public var failureReason: String? = nil
+    public var domain: String? = nil
     
     init (domain: String? = nil) {
         self.domain = domain
     }
 }
 
-struct BadCredentialsError: LocalizedError {
+public struct BadCredentialsError: LocalizedError {
     var title: String? = "Wrong username or password"
     var code = GKASCAPIErrorCode.badCredentials
     var errorDescription: String? = nil

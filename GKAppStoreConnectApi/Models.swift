@@ -17,6 +17,7 @@ public struct ASCApp {
 }
 
 public struct ASCUser {
+    public var email: String
     public var personId: String
     public var currentTeamId: String
     public var teams: [ASCTeam]
@@ -62,18 +63,6 @@ public struct ASCInAppPurchasePromoCode {
     public var creationDate: Int
     public var expirationDate: Int
     public var requestId: String
-}
-
-enum GKASCAPIErrorCode: Int {
-    case malformedRequest = 1
-    case serviceKeyMissing = 2
-    case unexpectedReply = 3
-    case securityCodeLocked = 4
-    case tooManyCodesSent = 5
-    case tooManyCodesValidated = 6
-    case codeNotLoggedIn = 7
-    case badJson = 8
-    case teamNotSelected = 9
 }
 
 let GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN = "co.gikken.PromoCodes.AppStoreConnectLogin"

@@ -182,6 +182,7 @@ public class GKAppStoreConnectApi {
                                     
                                     if (noTrustedDevices || trustedDevices.count == 0) && trustedPhoneNumbers.count == 0 {
                                         completionHandler(false, false, nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                        return
                                     }
                                     
                                     let securityCodeDict = dict["securityCode"] as? [String: Any] ?? [String: Any]()
@@ -236,12 +237,15 @@ public class GKAppStoreConnectApi {
                                     infoDict["didSendCode"] = false
                                     
                                     completionHandler(false, true, infoDict, nil)
+                                    return
                                 } catch let jsonError {
                                     completionHandler(false, false, nil, jsonError)
+                                    return
                                 }
                             }
                             
                             task.resume()
+                            return
                         } else if responseCode == 401 {
                             // Wrong password or email
                             completionHandler(false, false, nil, error ?? BadCredentialsError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
@@ -269,6 +273,7 @@ public class GKAppStoreConnectApi {
                             if dict["serviceErrors"] != nil {
                                 NSLog("*** received an error - possibly login: \(String(describing: dict["serviceErrors"]))")
                                 completionHandler(false, false, nil, error ?? UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                return
                             }
                             
                             // retrieve session data (returns teams, apps and user)
@@ -280,17 +285,21 @@ public class GKAppStoreConnectApi {
                                 }
                                 
                                 completionHandler(true, false, info, error)
+                                return
                             }
                         } catch _ {
                             completionHandler(false, false, nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                            return
                         }
                     }
                     task.resume()
                 } catch let jsonError {
                     completionHandler(false, false, nil, jsonError)
+                    return
                 }
             } catch let jsonError {
                 completionHandler(false, false, nil, jsonError)
+                return
             }
         }
         task.resume()

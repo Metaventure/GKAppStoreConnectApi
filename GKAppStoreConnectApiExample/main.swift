@@ -265,34 +265,4 @@ func listTeams() {
     }
 }
 
-//func selectTeam(command: String) {
-//    guard let teamId = Int(command.replacingOccurrences(of: "select team ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)) else {
-//        return
-//    }
-//
-//    selectedApp = nil
-//    selectedAppInfo = nil
-//    selectedIap = nil
-//
-//    proceed = false
-//    GKAppStoreConnectApi.shared.switchToTeamWith(teamID: teamId) { (success, error) in
-//        guard error == nil else {
-//            print("Error: \(error?.localizedDescription ?? "unknown")")
-//            proceed = true
-//            return
-//        }
-//        printCurrentTeam()
-//        proceed = true
-//    }
-//}
-//
-//func printCurrentTeam() {
-//    guard let team = GKAppStoreConnectApi.shared.currentTeam else {
-//        print("No team is selected")
-//        return
-//    }
-//
-//    print("Selected team: \(team.name)")
-//}
-
 main()

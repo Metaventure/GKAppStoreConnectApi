@@ -26,7 +26,7 @@ public class GKAppStoreConnectApi {
      @property        currentTeamID
      @abstract        Identifies the currently selected team. Needed in @c -_appsForCurrentTeamWithCompletionHandler:
      */
-    var currentTeamID: Int?
+    var loginTeamID: Int?
     
     /*!
      @property        tfaAppleIDSessionID
@@ -53,8 +53,20 @@ public class GKAppStoreConnectApi {
      */
     var userSession: [String: Any]?
     
-    public var currentTeam: ASCTeam? {
-        guard let teamId = currentTeamID, cachedTeams.count > 0 else {
+    /*!
+    @property        loginUrlSession
+    @abstract        Default user session used for login and team retrieval.
+    */
+    private var loginUrlSession: URLSession!
+    
+    /*!
+    @property        teamUrlSessions
+    @abstract        Contains separate sessions created for each team, eliminates the need to switch between teams.
+    */
+    private var teamUrlSessions = [Int: URLSession]()
+    
+    public var loginTeam: ASCTeam? {
+        guard let teamId = loginTeamID, cachedTeams.count > 0 else {
             return nil
         }
         for team in cachedTeams {
@@ -84,9 +96,11 @@ public class GKAppStoreConnectApi {
             return
         }
         
+        loginUrlSession = createLoginSession(for: username)
+        
         //first, retrieve authServiceKey / Apple Widget Key
         let req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/olympus/v1/app/config?hostname=itunesconnect.apple.com")!)
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        let task = loginUrlSession.dataTask(with: req) { (data, response, error) in
             guard let data = data, let _ = response, error == nil else {
                 completionHandler(false, false, nil, error)
                 return
@@ -122,7 +136,7 @@ public class GKAppStoreConnectApi {
                     
                     req = self.updateHeadersFor(request: req, additionalFields: [:])
                     
-                    let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+                    let task = self.loginUrlSession.dataTask(with: req) { (data, response, error) in
                         guard let resp = response as? HTTPURLResponse, let _ = data, error == nil else {
                             completionHandler(false, false, nil, error)
                             return
@@ -149,7 +163,7 @@ public class GKAppStoreConnectApi {
                             ])
                             
                             //request auth info from user
-                            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+                            let task = self.loginUrlSession.dataTask(with: req) { (data, response, error) in
                                 guard let _ = response, let data = data, error == nil else {
                                     completionHandler(false, false, nil, error)
                                     return
@@ -323,7 +337,7 @@ public class GKAppStoreConnectApi {
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
             req.httpBody = bodyData
             
-            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            let task = loginUrlSession.dataTask(with: req) { (data, response, error) in
                 guard let _ = response, let data = data, error == nil else {
                     completionHandler(false, error)
                     return
@@ -391,7 +405,7 @@ public class GKAppStoreConnectApi {
             
             req.httpBody = bodyData
             
-            let task = URLSession.shared.dataTask(with: req, completionHandler: { (data, response, error) in
+            let task = loginUrlSession.dataTask(with: req, completionHandler: { (data, response, error) in
                 guard let _ = response, let data = data, error == nil else {
                     completionHandler(false, nil, error)
                     return
@@ -416,7 +430,7 @@ public class GKAppStoreConnectApi {
                     "scnt": self.tfaScnt ?? ""
                 ])
                 
-                let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+                let task = self.loginUrlSession.dataTask(with: req) { (data, response, error) in
                     guard let _ = response, let _ = data, error == nil else {
                         completionHandler(false, nil, error)
                         return
@@ -443,20 +457,24 @@ public class GKAppStoreConnectApi {
         }
     }
     
-    func checkLoginWith(completionHandler: @escaping ((_ loggedIn: Bool, _ teams: [ASCTeam]?, _ currentTeamID: Int?, _ error: Error?) -> Void)) {
-        if !self.isLoggedIn || self.currentTeamID == nil || self.personID == nil {
-            completionHandler(false, nil, nil, MalformedRequestError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+    func checkLoginWith(completionHandler: @escaping ((_ loggedIn: Bool, _ teams: [ASCTeam]?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn || self.personID == nil {
+            completionHandler(false, nil, MalformedRequestError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
         }
         
         self.sessionDataWith { (sessionDict, error) in
-            completionHandler(sessionDict != nil && error == nil, self.cachedTeams, self.currentTeamID, error)
+            completionHandler(sessionDict != nil && error == nil, self.cachedTeams, error)
         }
     }
     
     // MARK: - App Retrieval
     
-    public func getApps() -> [ASCApp]? {
-        return self.currentTeam?.apps
+    public func getApps() -> [ASCApp] {
+        var apps = [ASCApp]()
+        for team in cachedTeams {
+            apps.append(contentsOf: team.apps)
+        }
+        return apps
     }
     
     func appsForTeamWith(providerID: Int, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
@@ -465,18 +483,7 @@ public class GKAppStoreConnectApi {
             return
         }
         
-        if providerID == self.currentTeamID {
-            self.appsForCurrentTeamWith(completionHandler: completionHandler)
-            return
-        }
-        
-        self.switchToTeamWith(teamID: providerID) { (sessionInfo, error) in
-            if error != nil {
-                completionHandler(nil, error)
-            }
-            
-            self.appsForCurrentTeamWith(completionHandler: completionHandler)
-        }
+        self.appsForTeamWith(id: providerID, completionHandler: completionHandler)
     }
     
     // MARK: - Promo Code Info and Creation
@@ -496,7 +503,15 @@ public class GKAppStoreConnectApi {
         req.httpShouldHandleCookies = true
         req.httpMethod = "GET"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        
+        guard let teamId = teamIdForApp(id: appID) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return
@@ -566,7 +581,15 @@ public class GKAppStoreConnectApi {
             req.httpBody = jsonData
             
             let creationRequestDate = Date(timeIntervalSinceNow: -1)
-            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            
+            guard let teamId = teamIdForApp(id: appID) else {
+                completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                return
+            }
+            
+            let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+            
+            let task = session.dataTask(with: req) { (data, response, error) in
                 guard let _ = response, let data = data, error == nil else {
                     completionHandler(nil, error)
                     return
@@ -589,11 +612,14 @@ public class GKAppStoreConnectApi {
                     
                 } catch let jsonError {
                     completionHandler(nil, jsonError)
+                    return
                 }
             }
             task.resume()
+            return
         } catch let jsonError {
             completionHandler(nil, jsonError)
+            return
         }
     }
     
@@ -610,7 +636,14 @@ public class GKAppStoreConnectApi {
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
         
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        guard let teamId = teamIdForApp(id: appId) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+            return
+        }
+        
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return
@@ -674,7 +707,15 @@ public class GKAppStoreConnectApi {
             req.httpBody = jsonData
             
             let creationRequestDate = Date(timeIntervalSinceNow: -1)
-            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            
+            guard let teamId = teamIdForApp(id: appID) else {
+                completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                return
+            }
+            
+            let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+            
+            let task = session.dataTask(with: req) { (data, response, error) in
                 guard let _ = response, let data = data, error == nil else {
                     completionHandler(nil, error)
                     return
@@ -709,6 +750,40 @@ public class GKAppStoreConnectApi {
     
     var isLoggedIn: Bool {
         return self.authServiceKey.count != 0 && self.personID != nil
+    }
+    
+    private func createLoginSession(for user: String) -> URLSession {
+        let config = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
+        config.httpCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "loginSession_\(user)")
+        config.httpCookieStorage?.cookieAcceptPolicy = .always
+        let session = URLSession(configuration: config)
+        return session
+    }
+    
+    func createSessionFor(teamID: Int) -> URLSession {
+        let config = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
+        config.httpCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "teamSession_\(teamID)")
+        config.httpCookieStorage?.cookieAcceptPolicy = .always
+        
+        let oldCookies = loginUrlSession.configuration.httpCookieStorage?.cookies ?? []
+        for cookie in oldCookies {
+             config.httpCookieStorage?.setCookie(cookie)
+        }
+        
+        let session = URLSession(configuration: config)
+        return session
+    }
+    
+    func teamIdForApp(id: Int) -> Int? {
+        for team in cachedTeams {
+            for app in team.apps {
+                if app.id == "\(id)" {
+                    return team.providerId
+                }
+            }
+        }
+        
+        return nil
     }
 
     func updateHeadersFor(request: URLRequest, additionalFields: [String: String]) -> URLRequest {
@@ -757,33 +832,41 @@ public class GKAppStoreConnectApi {
                 team1.name.compare(team2.name) == .orderedAscending
             }
             
-            self.cachedTeams = teams
+            self.cachedTeams.removeAll()
             
-            self.currentTeamID = (sessionDict["provider"] as? [String: Any])?["providerId"] as? Int
+            let teamsCount = teams.count
+            
+            self.loginTeamID = (sessionDict["provider"] as? [String: Any])?["providerId"] as? Int
             self.personID = (sessionDict["user"] as? [String: Any])?["prsId"] as? String
             
-            if self.currentTeamID != nil {
-                self.appsForTeamWith(providerID: self.currentTeamID!) { (apps, error) in
-                    guard let apps = apps, error == nil else {
-                        completionHandler(nil, error)
-                        return
-                    }
+            if teamsCount > 0 {
+                for team in teams {
+                    self.teamUrlSessions[team.providerId] = self.createSessionFor(teamID: team.providerId)
                     
-                    var teamIndex = 0
-                    for team in self.cachedTeams {
-                        var team = team
-                        if team.providerId == self.currentTeamID {
-                            team.apps = apps
-                            self.cachedTeams[teamIndex] = team
-                            break
+                    self.configureSessionForTeamWith(teamID: team.providerId) { (error) in
+                        if error == nil {
+                            self.appsForTeamWith(providerID: team.providerId) { (apps, error) in
+                                guard let apps = apps, error == nil else {
+                                    completionHandler(nil, error)
+                                    return
+                                }
+                                
+                                var team = team
+                                team.apps = apps
+                                
+                                self.cachedTeams.append(team)
+                                
+                                if self.cachedTeams.count == teamsCount {
+                                    completionHandler([
+                                        "teams": self.cachedTeams
+                                    ], nil)
+                                    return
+                                }
+                            }
+                        } else {
+                            completionHandler(nil, error)
                         }
-                        teamIndex += 1
                     }
-                    
-                    completionHandler([
-                        "teams": self.cachedTeams,
-                        "teamID": self.currentTeamID ?? -1
-                    ], nil)
                 }
             } else {
                 completionHandler(nil, error)
@@ -796,7 +879,7 @@ public class GKAppStoreConnectApi {
         req.httpShouldHandleCookies = true
         
         req = self.updateHeadersFor(request: req, additionalFields: [:])
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        let task = loginUrlSession.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return
@@ -820,14 +903,14 @@ public class GKAppStoreConnectApi {
         return self.cachedTeams
     }
     
-    public func switchToTeamWith(teamID: Int, completionHandler: @escaping ((_ sessionDict: [String: Any]?, _ error: Error?) -> Void)) {
+    func configureSessionForTeamWith(teamID: Int, completionHandler: @escaping ((_ error: Error?) -> Void)) {
         var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/olympus/v1/session")!)
         req.httpShouldHandleCookies = true
         req.httpMethod = "POST"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         
         guard let jsonDict = self.userSession else {
-            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+            completionHandler(NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
             return
         }
         
@@ -839,26 +922,31 @@ public class GKAppStoreConnectApi {
             
             req.httpBody = try sessionJson.rawData()
             
-            let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+            let session = self.teamUrlSessions[teamID] ?? self.createSessionFor(teamID: teamID)
+            
+            let task = session.dataTask(with: req) { (data, response, error) in
                 guard let _ = response, let _ = data, error == nil else {
-                    completionHandler(nil, error)
+                    completionHandler(error)
                     return
                 }
-                self.loadSessionDataAfterLoginWith(completionHandler: completionHandler)
+                completionHandler(nil)
+                return
             }
             task.resume()
         } catch let jsonError {
-            completionHandler(nil, jsonError)
+            completionHandler(jsonError)
         }
     }
     
-    func appsForCurrentTeamWith(completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
+    func appsForTeamWith(id teamId: Int, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
         var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/manageyourapps/summary/v2")!)
         req.httpShouldHandleCookies = true
         req.httpMethod = "GET"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return
@@ -927,7 +1015,7 @@ public class GKAppStoreConnectApi {
                 var teamIndex = 0
                 for team in self.cachedTeams {
                     var team = team
-                    if team.providerId == self.currentTeamID {
+                    if team.providerId == teamId {
                         team.apps = apps
                         self.cachedTeams[teamIndex] = team
                         break
@@ -1061,7 +1149,14 @@ public class GKAppStoreConnectApi {
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
         
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        guard let teamId = teamIdForApp(id: appID) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return
@@ -1090,7 +1185,14 @@ public class GKAppStoreConnectApi {
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
         
-        let task = URLSession.shared.dataTask(with: req) { (data, response, error) in
+        guard let teamId = teamIdForApp(id: appID) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
             guard let _ = response, let data = data, error == nil else {
                 completionHandler(nil, error)
                 return

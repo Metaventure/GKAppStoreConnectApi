@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4933577224375CB90024A8B1 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4933577124375CB90024A8B1 /* Errors.swift */; };
+		49B465C2243DE18F00418185 /* GKUniqueCookieStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */; };
 		9625AA5D23E08A320005265D /* GKAppStoreConnectApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9625AA6423E08A560005265D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6323E08A560005265D /* Models.swift */; };
 		9625AA6623E08D370005265D /* GKAppStoreConnectApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */; };
@@ -52,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		4933577124375CB90024A8B1 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GKUniqueCookieStorage.swift; sourceTree = "<group>"; };
 		9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GKAppStoreConnectApi.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GKAppStoreConnectApi.h; sourceTree = "<group>"; };
 		9625AA5C23E08A320005265D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				9625AA6323E08A560005265D /* Models.swift */,
 				4933577124375CB90024A8B1 /* Errors.swift */,
 				9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */,
+				49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */,
 				9625AA5C23E08A320005265D /* Info.plist */,
 			);
 			path = GKAppStoreConnectApi;
@@ -243,6 +246,7 @@
 				4933577224375CB90024A8B1 /* Errors.swift in Sources */,
 				96BBAC0223F56B800034B6BC /* SwiftyJSON.swift in Sources */,
 				9625AA6423E08A560005265D /* Models.swift in Sources */,
+				49B465C2243DE18F00418185 /* GKUniqueCookieStorage.swift in Sources */,
 				9625AA6623E08D370005265D /* GKAppStoreConnectApi.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -398,11 +402,13 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = GKAppStoreConnectApi/Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.AppStoreConnectApi.GKAppStoreConnectApi;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = NO;
@@ -410,6 +416,8 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+				WATCHOS_DEPLOYMENT_TARGET = 4.0;
 			};
 			name = Debug;
 		};
@@ -425,17 +433,21 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = GKAppStoreConnectApi/Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.AppStoreConnectApi.GKAppStoreConnectApi;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = NO;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos watchos watchsimulator appletvos appletvsimulator macosx";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+				WATCHOS_DEPLOYMENT_TARGET = 4.0;
 			};
 			name = Release;
 		};

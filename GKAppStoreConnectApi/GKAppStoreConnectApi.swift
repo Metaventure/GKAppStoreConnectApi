@@ -754,7 +754,7 @@ public class GKAppStoreConnectApi {
     
     private func createLoginSession(for user: String) -> URLSession {
         let config = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
-        config.httpCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "loginSession_\(user)")
+        config.httpCookieStorage = GKUniqueCookieStorage(identifier: "loginSession_\(user)")
         config.httpCookieStorage?.cookieAcceptPolicy = .always
         let session = URLSession(configuration: config)
         return session
@@ -762,12 +762,12 @@ public class GKAppStoreConnectApi {
     
     func createSessionFor(teamID: Int) -> URLSession {
         let config = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
-        config.httpCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "teamSession_\(teamID)")
+        config.httpCookieStorage = GKUniqueCookieStorage(identifier: "teamSession_\(teamID)")
         config.httpCookieStorage?.cookieAcceptPolicy = .always
         
         let oldCookies = loginUrlSession.configuration.httpCookieStorage?.cookies ?? []
         for cookie in oldCookies {
-             config.httpCookieStorage?.setCookie(cookie)
+            config.httpCookieStorage?.setCookie(cookie)
         }
         
         let session = URLSession(configuration: config)

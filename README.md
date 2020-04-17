@@ -25,11 +25,9 @@ The lib is a singleton, so you don't have to initialize it, you just call the me
 1. The first thing that needs to be done is you have to log in the user. There's `loginWith(username:password:)` for that. It will either immediately log the user in, or it will tell you that 2FA is active and your user needs to give you the code. You can also use the `info` object in the completion handler to see all the available 2FA options and give the user a choice. If you decide to do so – there's a `resend2FACodeWith(phoneID:)` method.
 
 2. After you've got the code from te user – call `finish2FAWith(code:phoneID:)` it will automatically know if the code was sent to a trusted device or as an SMS and call the right endpoint, which are different for some reason. Now we have that sweet login cookie.
-After we've got the cookie – the library will request the user session from the ASC, which contains all the info about the users teams, it also immediately downloads the apps for the current team.
+After we've got the cookie – the library will request the user session from the ASC, which contains all the info about the users teams, it also immediately downloads the apps for all the teams.
 
-3. Check the currentTeam and decide if it's the right one. Nevermind it if the user has only one team. If it's not the right one – go ahead and use the `switchToTeamWith(teamID:)` method, and `getTeams()` will help you list those.
-
-4. Now that the team part is settled – we can access the apps via `getApps()`. If the app is paid and you need a promo code for it – use `requestPromoCodesForAppWith(appID:versionID:quantity:contractFilename:)`. You can find the versionID and the contractFilename parameters in the app object you got from `getApps()`. 
+3. Access the apps via `getApps()`. If the app is paid and you need a promo code for it – use `requestPromoCodesForAppWith(appID:versionID:quantity:contractFilename:)`. You can find the versionID and the contractFilename parameters in the app object you got from `getApps()`. 
 It takes some time to get the codes, so you're better off presenting an activity indicator while it loads.
 
-5. Most probably, your app is free and it offers an IAP of some sort, cuz it's 2020, right? You will have to request a list of IAPs with `iapsForAppWith(appId:)`, and with that info you can use the `requestIapPromoCodesFor(iapID:appID: quantity:)`. Be patient, it's not instant too. Still much faster than the actual App Store Connect though 😏.
+4. Most probably, your app is free and it offers an IAP of some sort, cuz it's 2020, right? You will have to request a list of IAPs with `iapsForAppWith(appId:)`, and with that info you can use the `requestIapPromoCodesFor(iapID:appID: quantity:)`. Be patient, it's not instant too. Still much faster than the actual App Store Connect though 😏.

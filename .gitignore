@@ -25,4 +25,4 @@ DerivedData/
 ## Gcc Patch
 /*.gcno
 
-TestCredentials.swift
+.DS_Store

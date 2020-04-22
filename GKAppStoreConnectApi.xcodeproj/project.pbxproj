@@ -58,13 +58,6 @@
 			remoteGlobalIDString = 2E4FEFDA19575BE100351305;
 			remoteInfo = SwiftyJSON;
 		};
-		49A1F4D32450450E004FC39D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 49A1F4CF2450450E004FC39D /* Example.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4955C80224503F730071F0A3;
-			remoteInfo = GKAppStoreConnectApiExample;
-		};
 		9C7DFC671A9102BD005AA3F7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2E4FEFD219575BE100351305 /* Project object */;
@@ -92,7 +85,6 @@
 		4955C7E024503B720071F0A3 /* GKAppStoreConnectApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GKAppStoreConnectApi.h; sourceTree = "<group>"; };
 		4955C7E324503B720071F0A3 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
 		4955C7E424503B720071F0A3 /* GKAppStoreConnectApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GKAppStoreConnectApi.swift; sourceTree = "<group>"; };
-		49A1F4CF2450450E004FC39D /* Example.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Example.xcodeproj; path = Example/Example.xcodeproj; sourceTree = "<group>"; };
 		7236B4F61BAC14150020529B /* GKAppStoreConnectApi.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GKAppStoreConnectApi.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7236B4F71BAC14150020529B /* Info-tvOS.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
 		9C459EF61A9103B1008C9A41 /* Info-macOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Info-macOS.plist"; path = "../Info-macOS.plist"; sourceTree = "<group>"; };
@@ -167,7 +159,6 @@
 				2E4FEFDD19575BE100351305 /* Source */,
 				2E4FEFEA19575BE100351305 /* Tests */,
 				2E4FEFDC19575BE100351305 /* Products */,
-				49A1F4CF2450450E004FC39D /* Example.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -235,14 +226,6 @@
 				4955C7E324503B720071F0A3 /* SwiftyJSON.swift */,
 			);
 			path = Dependencies;
-			sourceTree = "<group>";
-		};
-		49A1F4D02450450E004FC39D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				49A1F4D42450450E004FC39D /* GKAppStoreConnectApiExample */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -467,12 +450,6 @@
 			mainGroup = 2E4FEFD119575BE100351305;
 			productRefGroup = 2E4FEFDC19575BE100351305 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 49A1F4D02450450E004FC39D /* Products */;
-					ProjectRef = 49A1F4CF2450450E004FC39D /* Example.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				2E4FEFDA19575BE100351305 /* GKAppStoreConnectApi iOS */,
@@ -486,16 +463,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		49A1F4D42450450E004FC39D /* GKAppStoreConnectApiExample */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = GKAppStoreConnectApiExample;
-			remoteRef = 49A1F4D32450450E004FC39D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		2E4FEFD919575BE100351305 /* Resources */ = {
@@ -789,7 +756,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -815,7 +782,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SKIP_INSTALL = YES;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
@@ -880,7 +847,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -907,7 +874,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -939,7 +906,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PLIST_FILE_OUTPUT_FORMAT = binary;
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -967,7 +934,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PLIST_FILE_OUTPUT_FORMAT = binary;
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1091,7 +1058,7 @@
 				INFOPLIST_FILE = "Source/Info-macOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1119,7 +1086,7 @@
 				INFOPLIST_FILE = "Source/Info-macOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.GKAppStoreConnectApi;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gikken.pods.GKAppStoreConnectApi;
 				PRODUCT_NAME = GKAppStoreConnectApi;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

@@ -53,7 +53,7 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
         let cookieUrls = loadCookieUrls()
         
         for url in cookieUrls {
-            let fileTimestamp = Int(url.lastPathComponent.components(separatedBy: "_")[1])!
+            let fileTimestamp = Int(url.lastPathComponent.components(separatedBy: cookieFilenameDelimiter)[1])!
             if fileTimestamp > Int(date.timeIntervalSince1970 * 1000) {
                 do {
                     try FileManager.default.removeItem(at: url)
@@ -88,8 +88,35 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
     }
     
     private func loadCookies(forUrl url: URL? = nil) -> [HTTPCookie] {
-        let files = loadCookieUrls(forUrl: url)
+        var files = loadCookieUrls(forUrl: url)
+        files = removeExpiredCookies(withUrls: files)
         return loadCookiesAt(fileUrls: files)
+    }
+    
+    private func removeExpiredCookies(withUrls urls: [URL]) -> [URL] {
+        let fm = FileManager()
+        var updatedUrls = Set<URL>(urls)
+        
+        for url in urls {
+            do {
+                let data = try Data(contentsOf: url)
+                if let cookieProperties = NSKeyedUnarchiver.unarchiveObject(with: data) as? [HTTPCookiePropertyKey : Any],
+                    let cookie = HTTPCookie(properties: cookieProperties) {
+                    
+                    if let cookieExpirationDate = cookie.expiresDate {
+                        let time = Date()
+                        if cookieExpirationDate <= time {
+                            updatedUrls.remove(url)
+                            try? fm.removeItem(at: url)
+                        }
+                    }
+                }
+            } catch let error {
+                NSLog("Failed to remove cookie at \(url.path). Error: \(error.localizedDescription)")
+            }
+        }
+        
+        return Array<URL>(updatedUrls)
     }
     
     private func loadCookiesAt(fileUrls files: [URL]) -> [HTTPCookie] {
@@ -128,6 +155,13 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
         return files
     }
     
+    private func existingCookieFilesWith(prefix: String, forUrl url: URL? = nil) -> [URL] {
+        let allUrls = loadCookieUrls(forUrl: url)
+        return allUrls.filter({
+            $0.lastPathComponent.starts(with: prefix)
+        })
+    }
+    
     private func storage(forUrl url: URL) -> URL {
         return storage(forDomain: url.host ?? "default")
     }
@@ -151,6 +185,13 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
                 try fm.createDirectory(at: cookiesDir, withIntermediateDirectories: true, attributes: nil)
             }
             
+            let prefix = filePrefixFor(cookie: cookie)
+            let existingCookieFiles = existingCookieFilesWith(prefix: prefix, forUrl: url)
+            
+            for url in existingCookieFiles {
+                try? fm.removeItem(at: url)
+            }
+            
             try cookieData.write(to: cookieUrl, options: .atomic)
         } catch let error {
             NSLog("Failed to store cookies at \(cookieUrl.path). Error: \(error.localizedDescription)")
@@ -165,7 +206,11 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
     }
     
     private func fileNameFor(cookie: HTTPCookie) -> String {
-        return "\(cookie.name)_\(Int(Date().timeIntervalSince1970 * 1000))_\(Int.random(in: 1000...9999)).\(cookieFileExtension)"
+        return "\(filePrefixFor(cookie: cookie))\(cookieFilenameDelimiter)\(Int(Date().timeIntervalSince1970 * 1000))\(cookieFilenameDelimiter)\(Int.random(in: 1000...9999)).\(cookieFileExtension)"
+    }
+    
+    private func filePrefixFor(cookie: HTTPCookie) -> String {
+        return "\(cookie.name)"
     }
     
     private func hmac(string: String, key: String) -> String {
@@ -176,5 +221,6 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
     }
     
     private let cookieFileExtension = "cookiedata"
+    private let cookieFilenameDelimiter = "_-_"
     
 }

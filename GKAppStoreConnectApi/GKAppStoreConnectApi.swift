@@ -137,11 +137,14 @@ public class GKAppStoreConnectApi {
                     req = self.updateHeadersFor(request: req, additionalFields: [:])
                     
                     let task = self.loginUrlSession.dataTask(with: req) { (data, response, error) in
-                        guard let resp = response as? HTTPURLResponse, let _ = data, error == nil else {
-                            completionHandler(false, false, nil, error)
+                        guard let resp = response as? HTTPURLResponse, let data = data, error == nil else {
+                            completionHandler(false, false, nil, error ?? UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
                             return
                         }
                         let responseCode = resp.statusCode
+                        #if DEBUG
+                        NSLog("Trying to log in, response code: \(responseCode)")
+                        #endif
                         if responseCode == 409 {
                             //two-factor or two-step authentication in effect, auth-code possibly already sent to user (via push to device or sms to trusted number)
                             let scnt = resp.allHeaderFields["scnt"] as? String ?? ""
@@ -262,10 +265,12 @@ public class GKAppStoreConnectApi {
                             return
                         } else if responseCode == 401 {
                             // Wrong password or email
+                            NSLog("Response: \(String(data: data, encoding: .utf8) ?? "")")
                             completionHandler(false, false, nil, error ?? BadCredentialsError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
                             return
                         } else if responseCode != 200 {
                             // something else went wrong.
+                            NSLog("Response: \(String(data: data, encoding: .utf8) ?? "")")
                             completionHandler(false, false, nil, error ?? UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
                             return
                         }
@@ -273,10 +278,6 @@ public class GKAppStoreConnectApi {
                         // we're already logged in - either 2FA is not enabled, or cookies are still valid from previous session
                         
                         do {
-                            guard let data = data else {
-                                throw UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
-                            }
-                            
                             let json = try JSONSerialization.jsonObject(with: data, options: []) //returns {"authType":"non-sa";}
                             
                             guard let dict = json as? [String: Any] else {
@@ -771,6 +772,8 @@ public class GKAppStoreConnectApi {
         }
         
         let session = URLSession(configuration: config)
+        self.teamUrlSessions[teamID] = session
+        
         return session
     }
     
@@ -841,15 +844,27 @@ public class GKAppStoreConnectApi {
             
             if teamsCount > 0 {
                 for team in teams {
-                    self.teamUrlSessions[team.providerId] = self.createSessionFor(teamID: team.providerId)
-                    
+                    _ = self.createSessionFor(teamID: team.providerId)
+                    #if DEBUG
+                    NSLog("Created a separate session for a team with id \(team.providerId)")
+                    #endif
                     self.configureSessionForTeamWith(teamID: team.providerId) { (error) in
+                        #if DEBUG
+                        NSLog("Configured the session for a team with id \(team.providerId)")
+                        #endif
                         if error == nil {
                             self.appsForTeamWith(providerID: team.providerId) { (apps, error) in
                                 guard let apps = apps, error == nil else {
                                     completionHandler(nil, error)
                                     return
                                 }
+                                
+                                #if DEBUG
+                                NSLog("Loaded \(apps.count) apps for team with id \(team.providerId)")
+                                for app in apps {
+                                    NSLog("\(app.id)")
+                                }
+                                #endif
                                 
                                 var team = team
                                 team.apps = apps
@@ -947,15 +962,25 @@ public class GKAppStoreConnectApi {
         let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
         
         let task = session.dataTask(with: req) { (data, response, error) in
-            guard let _ = response, let data = data, error == nil else {
+            guard let response = response as? HTTPURLResponse, let data = data, error == nil else {
                 completionHandler(nil, error)
+                return
+            }
+            
+            let responseCode = response.statusCode
+            
+            if responseCode == 401 || responseCode == 400 {
+                #if DEBUG
+                NSLog("Got \(responseCode) when requesting apps. Data: \(String(data: data, encoding: .utf8) ?? "")")
+                #endif
+                completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
                 return
             }
             
             do {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let appIDs = (dict["data"] as? [String: Any])?["summaries"] as? [[String: Any]] else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
                     return
                 }
                 
@@ -968,7 +993,7 @@ public class GKAppStoreConnectApi {
                     }
                     
                     guard let versionSets = dict["versionSets"] as? [[String: Any]] else {
-                        completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                        completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
                         return
                     }
                     
@@ -982,7 +1007,7 @@ public class GKAppStoreConnectApi {
                     
                     if platform.isEmpty {
                         guard let versionSets = dict["buildVersionSets"] as? [[String: Any]] else {
-                            completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                            completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
                             return
                         }
                         

@@ -42,20 +42,13 @@ public struct ASCAppInternalPurchase {
     public var codesLeft: Int
 }
 
-public struct ASCAppPromoCode {
+public struct ASCPromoCode {
     public var code: String
     public var creationDate: Date
     public var expirationDate: Date
     public var requestId: String
-    public var platform: String
-    public var version: String
-}
-
-public struct ASCIapPromoCode {
-    public var code: String
-    public var creationDate: Date
-    public var expirationDate: Date
-    public var requestId: String
+    public var platform: String? = nil
+    public var version: String? = nil
 }
 
 public struct ASCInAppPurchasePromoCode {

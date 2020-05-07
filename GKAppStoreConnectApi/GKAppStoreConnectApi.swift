@@ -553,7 +553,7 @@ public class GKAppStoreConnectApi {
                                      versionID: Int,
                                      quantity: Int,
                                      contractFilename: String,
-                                     completionHandler: @escaping ((_ promoCodes: [ASCAppPromoCode]?, _ error: Error?) -> Void)) {
+                                     completionHandler: @escaping ((_ promoCodes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
             return
@@ -679,7 +679,7 @@ public class GKAppStoreConnectApi {
     public func requestIapPromoCodesFor(iapID: Int,
                                         appID: Int,
                                      quantity: Int,
-                                     completionHandler: @escaping ((_ promoCodes: [ASCIapPromoCode]?, _ error: Error?) -> Void)) {
+                                     completionHandler: @escaping ((_ promoCodes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
             return
@@ -1056,7 +1056,7 @@ public class GKAppStoreConnectApi {
         task.resume()
     }
     
-    func recursivelyLoadPromoCodeHistoryForAppWith(appID: Int, creationRequestDate: Date, completionHandler: @escaping ((_ promoCodes: [ASCAppPromoCode]?, _ error: Error?) -> Void)) {
+    func recursivelyLoadPromoCodeHistoryForAppWith(appID: Int, creationRequestDate: Date, completionHandler: @escaping ((_ promoCodes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
         let lastRequestDate = Date()
         self.promoCodeHistoryForAppWith(appID: appID) { (historyDicts, error) in
             guard let historyDicts = historyDicts,
@@ -1066,7 +1066,7 @@ public class GKAppStoreConnectApi {
                     return
             }
             
-            var finalCodes = [ASCAppPromoCode]()
+            var finalCodes = [ASCPromoCode]()
             for codeDict in historyDicts {
                 guard let codes = codeDict["codes"] as? [String],
                     codes.count > 0,
@@ -1091,7 +1091,7 @@ public class GKAppStoreConnectApi {
                     let platform = (codeDict["version"] as? [String: Any])?["platform"] as? String ?? "" //osx, ios or appletvos
                     let version = (codeDict["version"] as? [String: Any])?["version"] as? String ?? ""
                     
-                    finalCodes.append(ASCAppPromoCode(code: code, creationDate: creationDate, expirationDate: expDate, requestId: requestId, platform: platform, version: version))
+                    finalCodes.append(ASCPromoCode(code: code, creationDate: creationDate, expirationDate: expDate, requestId: requestId, platform: platform, version: version))
                 }
             }
             
@@ -1113,7 +1113,7 @@ public class GKAppStoreConnectApi {
         }
     }
     
-    func recursivelyLoadIapPromoCodeHistoryForAppWith(appID: Int, creationRequestDate: Date, completionHandler: @escaping ((_ promoCodes: [ASCIapPromoCode]?, _ error: Error?) -> Void)) {
+    func recursivelyLoadIapPromoCodeHistoryForAppWith(appID: Int, creationRequestDate: Date, completionHandler: @escaping ((_ promoCodes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
         let lastRequestDate = Date()
         self.iapPromoCodeHistoryForAppWith(appID: appID) { (historyDicts, error) in
             guard let historyDicts = historyDicts,
@@ -1123,7 +1123,7 @@ public class GKAppStoreConnectApi {
                     return
             }
             
-            var finalCodes = [ASCIapPromoCode]()
+            var finalCodes = [ASCPromoCode]()
             for codeDict in historyDicts {
                 guard let codes = codeDict["codes"] as? [String],
                     codes.count > 0,
@@ -1146,7 +1146,7 @@ public class GKAppStoreConnectApi {
                     let code = code
                     let requestId = codeDict["id"] as? String ?? ""
                     
-                    finalCodes.append(ASCIapPromoCode(code: code, creationDate: creationDate, expirationDate: expDate, requestId: requestId))
+                    finalCodes.append(ASCPromoCode(code: code, creationDate: creationDate, expirationDate: expDate, requestId: requestId))
                 }
             }
             

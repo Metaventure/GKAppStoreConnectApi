@@ -9,14 +9,14 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>18</integer>
+			<integer>1</integer>
 		</dict>
 		<key>GKAppStoreConnectApiExample.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>17</integer>
+			<integer>0</integer>
 		</dict>
 		<key>GKAppStoreConnectApiMac.xcscheme_^#shared#^_</key>
 		<dict>

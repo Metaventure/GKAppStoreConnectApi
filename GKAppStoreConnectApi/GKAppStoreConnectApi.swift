@@ -568,6 +568,7 @@ public class GKAppStoreConnectApi {
         req.httpMethod = "POST"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
         
         let jsonArray: [[String: Any]] = [
             [
@@ -694,6 +695,7 @@ public class GKAppStoreConnectApi {
         req.httpMethod = "POST"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
         
         let jsonArray: [[String: Any]] = [
             [
@@ -1173,6 +1175,7 @@ public class GKAppStoreConnectApi {
         req.httpMethod = "GET"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
         
         guard let teamId = teamIdForApp(id: appID) else {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
@@ -1209,6 +1212,7 @@ public class GKAppStoreConnectApi {
         req.httpMethod = "GET"
         req = self.updateHeadersFor(request: req, additionalFields: [:])
         req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
         
         guard let teamId = teamIdForApp(id: appID) else {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))

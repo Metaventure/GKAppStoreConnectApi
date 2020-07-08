@@ -478,13 +478,13 @@ public class GKAppStoreConnectApi {
         return apps
     }
     
-    func appsForTeamWith(providerID: Int, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
+    func appsForTeamWith(providerID: Int, includeUnreleased: Bool, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
             return
         }
         
-        self.appsForTeamWith(id: providerID, completionHandler: completionHandler)
+        self.appsForTeamWith(id: providerID, includeUnreleased: includeUnreleased, completionHandler: completionHandler)
     }
     
     // MARK: - Promo Code Info and Creation
@@ -855,7 +855,7 @@ public class GKAppStoreConnectApi {
                         NSLog("Configured the session for a team with id \(team.providerId)")
                         #endif
                         if error == nil {
-                            self.appsForTeamWith(providerID: team.providerId) { (apps, error) in
+                            self.appsForTeamWith(providerID: team.providerId, includeUnreleased: false) { (apps, error) in
                                 guard let apps = apps, error == nil else {
                                     completionHandler(nil, error)
                                     return
@@ -955,7 +955,7 @@ public class GKAppStoreConnectApi {
         }
     }
     
-    func appsForTeamWith(id teamId: Int, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
+    func appsForTeamWith(id teamId: Int, includeUnreleased: Bool, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
         var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/manageyourapps/summary/v2")!)
         req.httpShouldHandleCookies = true
         req.httpMethod = "GET"
@@ -997,6 +997,22 @@ public class GKAppStoreConnectApi {
                     guard let versionSets = dict["versionSets"] as? [[String: Any]] else {
                         completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
                         return
+                    }
+                    
+                    // We don't ususally need unreleased or old removed apps, you can't generat promo codes for them
+                    if !includeUnreleased {
+                        var isAppReadyForSale = false
+                        for version in versionSets {
+                            if let deliverableVersion = version["deliverableVersion"] as? [String: Any],
+                                (deliverableVersion["state"] as? String) != "developerRemovedFromSale" {
+                                isAppReadyForSale = true
+                                break
+                            }
+                        }
+                        
+                        if !isAppReadyForSale {
+                            continue
+                        }
                     }
                     
                     var platform = ""

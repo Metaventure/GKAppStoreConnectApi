@@ -478,7 +478,7 @@ public class GKAppStoreConnectApi {
         return apps
     }
     
-    func appsForTeamWith(providerID: Int, includeUnreleased: Bool, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
+    public func appsForTeamWith(providerID: Int, includeUnreleased: Bool, completionHandler: @escaping ((_ apps: [ASCApp]?, _ error: Error?) -> Void)) {
         if !self.isLoggedIn {
             completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
             return
@@ -779,7 +779,7 @@ public class GKAppStoreConnectApi {
         return session
     }
     
-    func teamIdForApp(id: Int) -> Int? {
+    public func teamIdForApp(id: Int) -> Int? {
         for team in cachedTeams {
             for app in team.apps {
                 if app.id == "\(id)" {

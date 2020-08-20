@@ -1017,9 +1017,12 @@ public class GKAppStoreConnectApi {
                     
                     var platform = ""
                     for version in versionSets {
-                        platform = version["platformString"] as? String ?? "" //'osx' or 'ios' or 'appletvos'
-                        if !platform.isEmpty {
-                            break
+                        let newPlatform = version["platformString"] as? String ?? "" //'osx' or 'ios' or 'appletvos'
+                        if !newPlatform.isEmpty || !platform.contains(newPlatform) {
+                            if !platform.isEmpty {
+                                platform += ","
+                            }
+                            platform += newPlatform
                         }
                     }
                     
@@ -1030,9 +1033,12 @@ public class GKAppStoreConnectApi {
                         }
                         
                         for version in versionSets {
-                            platform = version["platformString"] as? String ?? "" //'osx' or 'ios' or 'appletvos'
-                            if !platform.isEmpty {
-                                break
+                            let newPlatform = version["platformString"] as? String ?? "" //'osx' or 'ios' or 'appletvos'
+                            if !newPlatform.isEmpty || !platform.contains(newPlatform) {
+                                if !platform.isEmpty {
+                                    platform += ","
+                                }
+                                platform += newPlatform
                             }
                         }
                     }

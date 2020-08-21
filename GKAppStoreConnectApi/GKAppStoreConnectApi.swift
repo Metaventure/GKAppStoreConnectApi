@@ -1050,8 +1050,6 @@ public class GKAppStoreConnectApi {
                     let name = dict["name"] as? String ?? ""
                     let iconUrl = dict["iconUrl"] as? String ?? ""
                     
-                    // TODO: Looks like the app is missing a name at this point
-                    
                     if !adamId.isEmpty {
                         apps.append(ASCApp(id: adamId, sku: sku, platform: platform, iconUrl: iconUrl, name: name))
                     }

@@ -999,7 +999,7 @@ public class GKAppStoreConnectApi {
                         return
                     }
                     
-                    // We don't ususally need unreleased or old removed apps, you can't generat promo codes for them
+                    // We don't ususally need unreleased or old removed apps, you can't generate promo codes for them
                     if !includeUnreleased {
                         var isAppReadyForSale = false
                         for version in versionSets {

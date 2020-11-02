@@ -185,7 +185,9 @@ public class GKAppStoreConnectApi {
                                 do {
                                     let json = try JSONSerialization.jsonObject(with: data, options: [])
                                     guard let dict = json as? [String: Any] else {
-                                        completionHandler(false, false, nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                        var error = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                                        error.failureReason = "\(json)"
+                                        completionHandler(false, false, nil, error)
                                         return
                                     }
 //                                    print(dict)
@@ -198,7 +200,9 @@ public class GKAppStoreConnectApi {
                                     let noTrustedDevices = dict["noTrustedDevices"] as? Bool ?? false
                                     
                                     if (noTrustedDevices || trustedDevices.count == 0) && trustedPhoneNumbers.count == 0 {
-                                        completionHandler(false, false, nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                        var error = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                                        error.failureReason = "\(json)"
+                                        completionHandler(false, false, nil, error)
                                         return
                                     }
                                     
@@ -281,13 +285,17 @@ public class GKAppStoreConnectApi {
                             let json = try JSONSerialization.jsonObject(with: data, options: []) //returns {"authType":"non-sa";}
                             
                             guard let dict = json as? [String: Any] else {
-                                completionHandler(false, false, nil, error ?? UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                                unexpectedError.failureReason = "\(json)"
+                                completionHandler(false, false, nil, error ?? unexpectedError)
                                 return
                             }
                             
                             if dict["serviceErrors"] != nil {
                                 NSLog("*** received an error - possibly login: \(String(describing: dict["serviceErrors"]))")
-                                completionHandler(false, false, nil, error ?? UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                                var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                                unexpectedError.failureReason = "\(json)"
+                                completionHandler(false, false, nil, error ?? unexpectedError)
                                 return
                             }
                             
@@ -357,7 +365,9 @@ public class GKAppStoreConnectApi {
                 || retStr.contains("sectionInfoKeys")
                 || retStr.contains("sectionWarningKeys") {
                     // found an error
-                    completionHandler(false, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                    unexpectedError.failureReason = retStr
+                    completionHandler(false, unexpectedError)
                     return
                 }
                 
@@ -420,7 +430,9 @@ public class GKAppStoreConnectApi {
                 || retStr.contains("sectionInfoKeys")
                 || retStr.contains("sectionWarningKeys") {
                     // found an error
-                    completionHandler(false, nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN)
+                    unexpectedError.failureReason = retStr
+                    completionHandler(false, nil, unexpectedError)
                     return
                 }
                 
@@ -528,8 +540,10 @@ public class GKAppStoreConnectApi {
                     let contractFilename = chosenDict["contractFileName"] as? String,
                     let maximumNumberOfCodes = chosenDict["maximumNumberOfCodes"] as? Int,
                     let numberOfCodes = chosenDict["numberOfCodes"] as? Int else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
-                    return
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
+                        return
                 }
                 
                 let codesLeft = maximumNumberOfCodes - numberOfCodes
@@ -602,7 +616,9 @@ public class GKAppStoreConnectApi {
                         let dataDict = dict["data"] as? [String: Any],
                         let successfulArray = dataDict["successful"] as? [Any],
                         successfulArray.count > 0 else {
-                        completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                        var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                        unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                        completionHandler(nil, unexpectedError)
                         return
                     }
                     
@@ -654,7 +670,9 @@ public class GKAppStoreConnectApi {
             do {
                 let json = try JSON(data: data)
                 guard let data = json["data"].array else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = json.rawString()
+                    completionHandler(nil, unexpectedError)
                     return
                 }
                 
@@ -729,7 +747,9 @@ public class GKAppStoreConnectApi {
                         let dataDict = dict["data"] as? [String: Any],
                         let successfulArray = dataDict["successful"] as? [Any],
                         successfulArray.count > 0 else {
-                        completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                        var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                        unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                        completionHandler(nil, unexpectedError)
                         return
                     }
                     
@@ -904,7 +924,9 @@ public class GKAppStoreConnectApi {
             
             do {
                 guard let sessionDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_LOGIN))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
                     return
                 }
                 
@@ -982,7 +1004,9 @@ public class GKAppStoreConnectApi {
             do {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let appIDs = (dict["data"] as? [String: Any])?["summaries"] as? [[String: Any]] else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
                     return
                 }
                 
@@ -995,7 +1019,9 @@ public class GKAppStoreConnectApi {
                     }
                     
                     guard let versionSets = dict["versionSets"] as? [[String: Any]] else {
-                        completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+                        var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS)
+                        unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                        completionHandler(nil, unexpectedError)
                         return
                     }
                     
@@ -1028,7 +1054,9 @@ public class GKAppStoreConnectApi {
                     
                     if platform.isEmpty {
                         guard let versionSets = dict["buildVersionSets"] as? [[String: Any]] else {
-                            completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+                            var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS)
+                            unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                            completionHandler(nil, unexpectedError)
                             return
                         }
                         
@@ -1214,7 +1242,9 @@ public class GKAppStoreConnectApi {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let dataDict = dict["data"] as? [String: Any],
                     let codeDicts = dataDict["requests"] as? [[String: Any]] else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
                     return
                 }
                 
@@ -1251,7 +1281,9 @@ public class GKAppStoreConnectApi {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let dataDict = dict["data"] as? [String: Any],
                     let codeDicts = dataDict["promoCodeRequests"] as? [[String: Any]] else {
-                    completionHandler(nil, UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
                     return
                 }
                 

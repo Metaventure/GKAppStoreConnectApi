@@ -49,7 +49,7 @@ public struct ServiceKeyMissingError: LocalizedError {
 public struct UnexpectedReplyError: LocalizedError {
     public var title: String? = "Unexpected reply"
     public var code = GKASCAPIErrorCode.unexpectedReply
-    public var errorDescription: String?
+    public var errorDescription: String? = "We don't know why this happened. Please try again or contact support if it doesn't help."
     public var failureReason: String?
     public var domain: String?
     
@@ -73,7 +73,7 @@ public struct SecurityCodeLockedError: LocalizedError {
 public struct TooManyCodesSentError: LocalizedError {
     public var title: String? = "Too many codes sent"
     public var code = GKASCAPIErrorCode.tooManyCodesSent
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "Too many codes were sent. Please try again later."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -85,7 +85,7 @@ public struct TooManyCodesSentError: LocalizedError {
 public struct TooManyCodesValidatedError: LocalizedError {
     public var title: String? = "Too many codes validated"
     public var code = GKASCAPIErrorCode.tooManyCodesValidated
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "Too many codes were validated. Please try again later."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -97,7 +97,7 @@ public struct TooManyCodesValidatedError: LocalizedError {
 public struct NotLoggedInError: LocalizedError {
     public var title: String? = "Not logged in"
     public var code = GKASCAPIErrorCode.codeNotLoggedIn
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "You are not logged in. You have to log in to perform this operation."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -109,7 +109,7 @@ public struct NotLoggedInError: LocalizedError {
 public struct BadJsonError: LocalizedError {
     public var title: String? = "Bad JSON"
     public var code = GKASCAPIErrorCode.badJson
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "We don't know why this happened. Please try again or contact support if it doesn't help."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -121,7 +121,7 @@ public struct BadJsonError: LocalizedError {
 public struct TeamNotSelected: LocalizedError {
     public var title: String? = "Team not selected"
     public var code = GKASCAPIErrorCode.teamNotSelected
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "We don't know why this happened. Please try again or contact support if it doesn't help."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -133,7 +133,7 @@ public struct TeamNotSelected: LocalizedError {
 public struct BadTwoFactorCodeError: LocalizedError {
     public var title: String? = "Bad 2FA code"
     public var code = GKASCAPIErrorCode.badTwoFactorCode
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "The entered code is wrong. Please try again."
     public var failureReason: String? = nil
     public var domain: String? = nil
     
@@ -145,7 +145,7 @@ public struct BadTwoFactorCodeError: LocalizedError {
 public struct BadCredentialsError: LocalizedError {
     public var title: String? = "Wrong username or password"
     public var code = GKASCAPIErrorCode.badCredentials
-    public var errorDescription: String? = nil
+    public var errorDescription: String? = "Wrong username or password"
     public var failureReason: String? = nil
     public var domain: String? = nil
     

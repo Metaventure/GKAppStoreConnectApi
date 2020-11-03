@@ -78,13 +78,13 @@ public struct ASCAppInternalPurchase {
 
 public struct ASCPromoCode {
     public var code: String
-    public var creationDate: Date
-    public var expirationDate: Date
+    public var creationDate: Date?
+    public var expirationDate: Date?
     public var requestId: String
     public var platform: String? = nil
     public var version: String? = nil
     
-    public init(code: String, creationDate: Date, expirationDate: Date, requestId: String, platform: String? = nil, version: String? = nil) {
+    public init(code: String, creationDate: Date?, expirationDate: Date?, requestId: String, platform: String? = nil, version: String? = nil) {
         self.code = code
         self.creationDate = creationDate
         self.expirationDate = expirationDate

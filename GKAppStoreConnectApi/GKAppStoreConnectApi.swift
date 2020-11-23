@@ -142,6 +142,7 @@ public class GKAppStoreConnectApi {
                             return
                         }
                         let responseCode = resp.statusCode
+                        
                         #if DEBUG
                         NSLog("Trying to log in, response code: \(responseCode)")
                         #endif

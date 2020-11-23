@@ -76,12 +76,9 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
     private var storageUrl: URL!
     
     private func loadStorage(forIdentifier id: String) {
-        let fm = FileManager()
-        guard var baseUrl = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+        guard var baseUrl = GKUniqueCookieStorage.baseUrl else {
             fatalError("Can't create cookie storage")
         }
-        
-        baseUrl.appendPathComponent("GKUniqueCookieStorage")
         baseUrl.appendPathComponent(hmac(string: id, key: "/B?E(H+MbQeThVmYq3t6w9z$C&F)J@Nc"))
         
         storageUrl = baseUrl
@@ -220,7 +217,42 @@ class GKUniqueCookieStorage: HTTPCookieStorage {
         return data.map { String(format: "%02hhx", $0) }.joined()
     }
     
+    static var baseUrl: URL? {
+        let fm = FileManager()
+        let url = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+        return url?.appendingPathComponent("GKUniqueCookieStorage")
+    }
+    
     private let cookieFileExtension = "cookiedata"
     private let cookieFilenameDelimiter = "_-_"
     
+}
+
+public class GKUniqueCookieStorageHelper {
+    public static func clearCookies(includingDes5: Bool = false) {
+        if let baseUrl = GKUniqueCookieStorage.baseUrl {
+            let fm = FileManager()
+            do {
+                let allStorages = try fm.contentsOfDirectory(atPath: baseUrl.path)
+                for storage in allStorages {
+                    let storageUrl = baseUrl.appendingPathComponent(storage)
+                    for website in try fm.contentsOfDirectory(atPath: storageUrl.path) {
+                        let websiteUrl = storageUrl.appendingPathComponent(website)
+                        
+                        if includingDes5 {
+                            try fm.removeItem(atPath: websiteUrl.path)
+                        } else {
+                            for cookie in try fm.contentsOfDirectory(atPath: websiteUrl.path) {
+                                if !cookie.starts(with: "DES5") {
+                                    try fm.removeItem(atPath: websiteUrl.appendingPathComponent(cookie).path)
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (_) {
+                
+            }
+        }
+    }
 }

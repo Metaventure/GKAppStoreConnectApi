@@ -769,6 +769,167 @@ public class GKAppStoreConnectApi {
             completionHandler(nil, jsonError)
         }
     }
+    
+    // MARK: - Offer Codes
+    public func createOfferCampaign(forApp appId: Int,
+                             iapId: Int,
+                             name: String,
+                             tierStem: String,
+                             duration: ASCOfferCampaign.Duration,
+                             offerType: ASCOfferCampaign.OfferType,
+                             newSubscribersEligible: Bool,
+                             existingSubscribersEligible: Bool,
+                             expiredSubscribersEligible: Bool,
+                             stacksWithIntroOffer: Bool,
+                             completionHandler: @escaping ((_ campaing: ASCOfferCampaign?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        if iapId == 0 || appId == 0 {
+            completionHandler(nil, MalformedRequestError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps/\(iapId)/pricing/campaigns")!)
+        req.httpMethod = "POST"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
+        
+        var countriesJson = [[String: Any]]()
+        
+        for country in ASCCountry.allCountries {
+            countriesJson.append([
+                "country": country,
+                "durationType": duration.rawValue,
+                "numOfPeriods": 1,
+                "offerModeType": offerType.rawValue,
+                "tierStem": tierStem
+            ])
+        }
+        
+        let jsonDict: [String: Any] = [
+            "campaigns": [
+                "value": [
+                    "referenceName": name,
+                    "tierStem": tierStem,
+                    "newSubscribersEligible": newSubscribersEligible,
+                    "existingSubscribersEligible": existingSubscribersEligible,
+                    "expiredSubscribersEligible": expiredSubscribersEligible,
+                    "stacksWithIntroOffer": stacksWithIntroOffer,
+                    "offerPricings": countriesJson
+                ]
+            ]
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+            req.httpBody = jsonData
+            
+            guard let teamId = teamIdForApp(id: appId) else {
+                completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                return
+            }
+            
+            let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+            
+            let task = session.dataTask(with: req) { (data, response, error) in
+                guard let _ = response, let data = data, error == nil else {
+                    completionHandler(nil, error)
+                    return
+                }
+                
+                do {
+                    let json = try JSON(data: data)
+                    guard let id = json["info"].arrayValue.first?.string?.components(separatedBy: "ids:").last,
+                          id.count > 0 else {
+                        var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                        unexpectedError.failureReason = json.rawString()
+                        completionHandler(nil, unexpectedError)
+                        return
+                    }
+                    
+                    completionHandler(ASCOfferCampaign(id: id, duration: duration), nil)
+                } catch let jsonError {
+                    completionHandler(nil, jsonError)
+                }
+            }
+            task.resume()
+        } catch let jsonError {
+            completionHandler(nil, jsonError)
+        }
+    }
+    
+    public func createOfferCodes(forApp appId: Int,
+                             iapId: Int,
+                             count: Int,
+                             campaign: ASCOfferCampaign,
+                             completionHandler: @escaping ((_ codes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        if iapId == 0 || appId == 0 {
+            completionHandler(nil, MalformedRequestError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps/\(iapId)/pricing/campaigns/\(campaign.id)/codes")!)
+        req.httpMethod = "POST"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        req.timeoutInterval = 60*3
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let expireDate = Date().addingTimeInterval(campaign.duration.interval)
+        
+        let jsonDict: [String: Any] = [
+            "count": count,
+            "expireDate": dateFormatter.string(from: expireDate)
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+            req.httpBody = jsonData
+            
+            guard let teamId = teamIdForApp(id: appId) else {
+                completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+                return
+            }
+            
+            let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+            
+            let task = session.dataTask(with: req) { (data, response, error) in
+                guard let _ = response, let data = data, error == nil else {
+                    completionHandler(nil, error)
+                    return
+                }
+                
+                do {
+                    let json = try JSON(data: data)
+                    guard let id = json["info"].arrayValue.first?.string?.components(separatedBy: "id:").last,
+                          id.count > 0 else {
+                        var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                        unexpectedError.failureReason = json.rawString()
+                        completionHandler(nil, unexpectedError)
+                        return
+                    }
+                    
+                    self.downloadOfferCodes(forApp: appId, iapId: iapId, codesId: id, count: count, expirationDate: expireDate, campaign: campaign, completionHandler: completionHandler)
+                } catch let jsonError {
+                    completionHandler(nil, jsonError)
+                }
+            }
+            task.resume()
+        } catch let jsonError {
+            completionHandler(nil, jsonError)
+        }
+    }
 
     // MARK: - Helper Methods
     
@@ -1293,6 +1454,114 @@ public class GKAppStoreConnectApi {
             } catch let jsonError {
                 completionHandler(nil, jsonError)
             }
+        }
+        task.resume()
+    }
+    
+    func getCountriesAndPrices(forApp appId: Int,
+                               iapId: Int,
+                               completionHandler: @escaping ((_ countries: [ASCCountry]?, _ error: Error?) -> Void)) {
+        if !self.isLoggedIn {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
+            return
+        }
+        
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps/\(iapId)/pricing/equalize/USD/1?countryCodes=\(ASCCountry.allCountries.joined(separator: ","))")!)
+        req.httpMethod = "GET"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        guard let teamId = teamIdForApp(id: appId) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+            return
+        }
+        
+        let session = teamUrlSessions[teamId] ?? createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
+            guard let _ = response, let data = data, error == nil else {
+                completionHandler(nil, error)
+                return
+            }
+            
+            do {
+                let json = try JSON(data: data)
+                guard let data = json["data"].dictionaryObject else {
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = json.rawString()
+                    completionHandler(nil, unexpectedError)
+                    return
+                }
+                
+                var countries = [ASCCountry]()
+                
+                for (key, countryJson) in data {
+                    if let countryJson = countryJson as? JSON {
+                        let code = key
+                        let countryName = countryJson["countryName"].stringValue
+                        let fRetailPrice = countryJson["fRetailPrice"].stringValue
+                        let fWholesalePrice = countryJson["fWholesalePrice"].stringValue
+                        let fWholesalePrice2 = countryJson["fWholesalePrice2"].stringValue
+                        let tierStem = countryJson["tierStem"].stringValue
+                        
+                        countries.append(ASCCountry(code: code, countryName: countryName, fRetailPrice: fRetailPrice, fWholesalePrice: fWholesalePrice, fWholesalePrice2: fWholesalePrice2, tierStem: tierStem))
+                    }
+                }
+                
+                completionHandler(countries, nil)
+            } catch let jsonError {
+                completionHandler(nil, jsonError)
+            }
+        }
+        task.resume()
+    }
+    
+    func downloadOfferCodes(forApp appId: Int,
+                             iapId: Int,
+                             codesId: String,
+                             count: Int,
+                             expirationDate: Date,
+                             campaign: ASCOfferCampaign,
+                             completionHandler: @escaping ((_ codes: [ASCPromoCode]?, _ error: Error?) -> Void)) {
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps/\(iapId)/pricing/campaigns/\(campaign.id)/codes/\(codesId)/export")!)
+        req.httpMethod = "GET"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        guard let teamId = self.teamIdForApp(id: appId) else {
+            completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+            return
+        }
+        
+        let session = self.teamUrlSessions[teamId] ?? self.createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
+            guard let _ = response, let data = data, error == nil else {
+                completionHandler(nil, error)
+                return
+            }
+            
+            guard let codesString = String(data: data, encoding: .utf8) else {
+                let unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                completionHandler(nil, unexpectedError)
+                return
+            }
+            
+            let codes = codesString.components(separatedBy: ",")
+            
+            guard codes.count > count else {
+                var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                unexpectedError.failureReason = codesString
+                completionHandler(nil, unexpectedError)
+                return
+            }
+            
+            let ascCodes = codes.map {
+                (code) -> ASCPromoCode in
+                return ASCPromoCode(code: code, creationDate: Date(), expirationDate: expirationDate, requestId: codesId, platform: nil, version: nil, type: .offer)
+            }
+            
+            completionHandler(ascCodes, nil)
         }
         task.resume()
     }

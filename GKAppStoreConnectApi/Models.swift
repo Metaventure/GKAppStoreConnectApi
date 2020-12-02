@@ -68,11 +68,13 @@ public struct ASCAppInternalPurchase {
     public var id: String
     public var name: String
     public var codesLeft: Int
+    public var isSubscription: Bool
     
-    public init(id: String, name: String, codesLeft: Int) {
+    public init(id: String, name: String, codesLeft: Int, isSubscription: Bool) {
         self.id = id
         self.name = name
         self.codesLeft = codesLeft
+        self.isSubscription = isSubscription
     }
 }
 

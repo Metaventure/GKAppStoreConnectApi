@@ -802,25 +802,31 @@ public class GKAppStoreConnectApi {
         var countriesJson = [[String: Any]]()
         
         for country in ASCCountry.allCountries {
-            countriesJson.append([
+            var countryDict: [String: Any] = [
                 "country": country,
-                "durationType": duration.rawValue,
-                "numOfPeriods": 1,
-                "offerModeType": offerType.rawValue,
-                "tierStem": tierStem
-            ])
+                "durationType": duration.durationType,
+                "numOfPeriods": duration.numberOfPeriods,
+                "offerModeType": offerType.rawValue
+            ]
+            
+            if offerType != .free {
+                countryDict["tierStem"] = tierStem
+            }
+            
+            countriesJson.append(countryDict)
         }
         
         let jsonDict: [String: Any] = [
             "campaigns": [
-                "value": [
-                    "referenceName": name,
-                    "tierStem": tierStem,
-                    "newSubscribersEligible": newSubscribersEligible,
-                    "existingSubscribersEligible": existingSubscribersEligible,
-                    "expiredSubscribersEligible": expiredSubscribersEligible,
-                    "stacksWithIntroOffer": stacksWithIntroOffer,
-                    "offerPricings": countriesJson
+                [
+                    "value": [
+                        "referenceName": name,
+                        "newSubscribersEligible": newSubscribersEligible,
+                        "existingSubscribersEligible": existingSubscribersEligible,
+                        "expiredSubscribersEligible": expiredSubscribersEligible,
+                        "stacksWithIntroOffer": stacksWithIntroOffer,
+                        "offerPricings": countriesJson
+                    ]
                 ]
             ]
         ]
@@ -828,6 +834,8 @@ public class GKAppStoreConnectApi {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
             req.httpBody = jsonData
+            
+            debugLog(String(data: jsonData, encoding: .utf8))
             
             guard let teamId = teamIdForApp(id: appId) else {
                 completionHandler(nil, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES))
@@ -844,15 +852,18 @@ public class GKAppStoreConnectApi {
                 
                 do {
                     let json = try JSON(data: data)
-                    guard let id = json["info"].arrayValue.first?.string?.components(separatedBy: "ids:").last,
+                    guard let id = json["messages"]["info"].arrayValue.first?.string?.components(separatedBy: "ids:").last?.trimmingCharacters(in: .whitespacesAndNewlines),
                           id.count > 0 else {
                         var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
                         unexpectedError.failureReason = json.rawString()
+                        debugLog("Failed to create an offer campaign \(json.rawString() ?? "")")
                         completionHandler(nil, unexpectedError)
                         return
                     }
                     
-                    completionHandler(ASCOfferCampaign(id: id, duration: duration), nil)
+                    debugLog("Created an offer campaign with id \(id)")
+                    
+                    completionHandler(ASCOfferCampaign(id: id, duration: duration, newSubscribersEligibility: newSubscribersEligible, existingSubscribersEligibility: existingSubscribersEligible, expiredSubscribersEligibility: expiredSubscribersEligible, typeOfOffer: offerType, priceTier: Int(tierStem)!), nil)
                 } catch let jsonError {
                     completionHandler(nil, jsonError)
                 }
@@ -887,7 +898,7 @@ public class GKAppStoreConnectApi {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        let expireDate = Date().addingTimeInterval(campaign.duration.interval)
+        let expireDate = Date().addingTimeInterval(kASCOfferCodeDuration)
         
         let jsonDict: [String: Any] = [
             "count": count,
@@ -913,13 +924,16 @@ public class GKAppStoreConnectApi {
                 
                 do {
                     let json = try JSON(data: data)
-                    guard let id = json["info"].arrayValue.first?.string?.components(separatedBy: "id:").last,
+                    guard let id = json["messages"]["info"].arrayValue.first?.string?.components(separatedBy: "id:").last?.trimmingCharacters(in: .whitespacesAndNewlines),
                           id.count > 0 else {
                         var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
                         unexpectedError.failureReason = json.rawString()
+                        debugLog("Failed to generate offer codes \(json.rawString() ?? "")")
                         completionHandler(nil, unexpectedError)
                         return
                     }
+                    
+                    debugLog("Generated offer codes for app \(appId), iap \(iapId), count \(count)")
                     
                     self.downloadOfferCodes(forApp: appId, iapId: iapId, codesId: id, count: count, expirationDate: expireDate, campaign: campaign, completionHandler: completionHandler)
                 } catch let jsonError {
@@ -1550,7 +1564,7 @@ public class GKAppStoreConnectApi {
             
             let codes = codesString.components(separatedBy: ",")
             
-            guard codes.count > count else {
+            guard codes.count >= count else {
                 var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
                 unexpectedError.failureReason = codesString
                 completionHandler(nil, unexpectedError)

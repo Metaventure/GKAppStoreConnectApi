@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4933577224375CB90024A8B1 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4933577124375CB90024A8B1 /* Errors.swift */; };
+		49347A3F257F86BA0060FB1C /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49347A3E257F86BA0060FB1C /* Debug.swift */; };
 		49B465C2243DE18F00418185 /* GKUniqueCookieStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */; };
 		9625AA5D23E08A320005265D /* GKAppStoreConnectApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9625AA6423E08A560005265D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625AA6323E08A560005265D /* Models.swift */; };
@@ -53,6 +54,7 @@
 
 /* Begin PBXFileReference section */
 		4933577124375CB90024A8B1 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		49347A3E257F86BA0060FB1C /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GKUniqueCookieStorage.swift; sourceTree = "<group>"; };
 		9625AA5823E08A320005265D /* GKAppStoreConnectApi.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GKAppStoreConnectApi.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9625AA5B23E08A320005265D /* GKAppStoreConnectApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GKAppStoreConnectApi.h; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				9625AA6323E08A560005265D /* Models.swift */,
 				4933577124375CB90024A8B1 /* Errors.swift */,
 				9625AA6523E08D370005265D /* GKAppStoreConnectApi.swift */,
+				49347A3E257F86BA0060FB1C /* Debug.swift */,
 				49B465C1243DE18F00418185 /* GKUniqueCookieStorage.swift */,
 				9625AA5C23E08A320005265D /* Info.plist */,
 			);
@@ -244,6 +247,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4933577224375CB90024A8B1 /* Errors.swift in Sources */,
+				49347A3F257F86BA0060FB1C /* Debug.swift in Sources */,
 				96BBAC0223F56B800034B6BC /* SwiftyJSON.swift in Sources */,
 				9625AA6423E08A560005265D /* Models.swift in Sources */,
 				49B465C2243DE18F00418185 /* GKUniqueCookieStorage.swift in Sources */,

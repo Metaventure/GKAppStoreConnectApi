@@ -945,6 +945,55 @@ public class GKAppStoreConnectApi {
             completionHandler(nil, jsonError)
         }
     }
+    
+    public func deleteOfferCampaign(forApp appId: Int,
+                                    iapId: Int,
+                                    campaignId: String,
+                                    completionHandler: @escaping ((_ success: Bool, _ error: Error?) -> Void)) {
+        var req = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/apps/\(appId)/iaps/\(iapId)/pricing/campaigns/\(campaignId)")!)
+        req.httpMethod = "DELETE"
+        req = self.updateHeadersFor(request: req, additionalFields: [:])
+        req.httpShouldHandleCookies = true
+        
+        guard let teamId = self.teamIdForApp(id: appId) else {
+            completionHandler(false, NotLoggedInError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_APPS))
+            return
+        }
+        
+        let session = self.teamUrlSessions[teamId] ?? self.createSessionFor(teamID: teamId)
+        
+        let task = session.dataTask(with: req) { (data, response, error) in
+            guard let _ = response, let data = data, error == nil else {
+                completionHandler(false, error)
+                return
+            }
+            
+            do {
+                let json = try JSON(data: data)
+                guard let status = json["statusCode"].string else {
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = json.rawString()
+                    debugLog("Failed to delete an offer campaign \(json.rawString() ?? "")")
+                    completionHandler(false, unexpectedError)
+                    return
+                }
+                
+                debugLog("Deleted an offer campaign \(campaignId)")
+                
+                if status == "SUCCESS" {
+                    completionHandler(true, nil)
+                } else {
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = json.rawString()
+                    debugLog("Failed to delete an offer campaign \(json.rawString() ?? "")")
+                    completionHandler(false, unexpectedError)
+                }
+            } catch let jsonError {
+                completionHandler(false, jsonError)
+            }
+        }
+        task.resume()
+    }
 
     // MARK: - Helper Methods
     

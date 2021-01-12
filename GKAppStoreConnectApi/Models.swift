@@ -69,12 +69,14 @@ public struct ASCAppInternalPurchase {
     public var name: String
     public var codesLeft: Int
     public var isSubscription: Bool
+    public var durationDays: Int?
     
-    public init(id: String, name: String, codesLeft: Int, isSubscription: Bool) {
+    public init(id: String, name: String, codesLeft: Int, isSubscription: Bool, durationDays: Int?) {
         self.id = id
         self.name = name
         self.codesLeft = codesLeft
         self.isSubscription = isSubscription
+        self.durationDays = durationDays
     }
 }
 
@@ -262,21 +264,35 @@ public struct ASCOfferCampaign {
         case payUpFront = "PayUpFront"
         case free = "FreeTrial"
         
-        public func getDurations(baseDuration duration: Duration) -> [Duration] {
+        public func getDurations(subDurationDays duration: Int) -> [Duration] {
             switch self {
             case .payAsYouGo:
-                switch duration.durationType {
-                case "m":
+                switch duration {
+                case 7:
+                    return [.week, .twoWeeks, .month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                case 30:
                     return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
-                case "3m":
+                case 90:
                     return [.threeMonths, .sixMonths, .nineMonths, .twelveMonths]
-                case "y":
+                case 365:
                     return [.year]
                 default:
-                    return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                    return [.threeDays, .week, .twoWeeks, .month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
                 }
             case .payUpFront:
-                return [.month, .twoMonths, .threeMonths, .sixMonths, .year]
+                switch duration {
+                case 7:
+                    return [.week, .twoWeeks, .month, .twoMonths, .threeMonths, .sixMonths, .year]
+                case 30:
+                    return [.month, .twoMonths, .threeMonths, .sixMonths, .year]
+                case 90:
+                    return [.threeMonths, .sixMonths, .nineMonths, .year]
+                case 365:
+                    return [.year]
+                default:
+                    return [.threeDays, .week, .twoWeeks, .month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                }
+                
             case .free:
                 return [.threeDays, .week, .twoWeeks, .month, .twoMonths, .threeMonths, .sixMonths, .year]
             }

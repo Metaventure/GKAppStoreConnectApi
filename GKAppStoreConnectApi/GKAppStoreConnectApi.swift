@@ -685,8 +685,11 @@ public class GKAppStoreConnectApi {
                     let maximumNumberOfCodes = inAppPurchaseJson["maximumNumberOfCodes"].intValue
                     let numberOfCodes = inAppPurchaseJson["numberOfCodes"].intValue
                     let isSubscription = inAppPurchaseJson["durationDays"].intValue > 0
-                    
-                    iaps.append(ASCAppInternalPurchase(id: adamId, name: name, codesLeft: maximumNumberOfCodes - numberOfCodes, isSubscription: isSubscription))
+                    let durationDays = inAppPurchaseJson["durationDays"].int
+                    // 365
+                    // 30
+                    // 90?
+                    iaps.append(ASCAppInternalPurchase(id: adamId, name: name, codesLeft: maximumNumberOfCodes - numberOfCodes, isSubscription: isSubscription, durationDays: durationDays))
                 }
                 
                 completionHandler(iaps, nil)

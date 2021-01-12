@@ -197,7 +197,7 @@ public struct ASCOfferCampaign {
         
         public var durationType: String {
             let type = rawValue.last!
-            if type == "m" {
+            if rawValue != "3m" && type == "m" {
                 return "1\(rawValue.last!)"
             } else {
                 return rawValue
@@ -206,7 +206,11 @@ public struct ASCOfferCampaign {
         
         public var numberOfPeriods: Int {
             let type = rawValue.last!
-            if type == "m" {
+            if rawValue == "3m" {
+                var value = rawValue
+                value.removeLast()
+                return Int(value)! / 3
+            } else if type == "m" {
                 var value = rawValue
                 value.removeLast()
                 return Int(value)!
@@ -258,10 +262,19 @@ public struct ASCOfferCampaign {
         case payUpFront = "PayUpFront"
         case free = "FreeTrial"
         
-        public var durations: [Duration] {
+        public func getDurations(baseDuration duration: Duration) -> [Duration] {
             switch self {
             case .payAsYouGo:
-                return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                switch duration.durationType {
+                case "m":
+                    return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                case "3m":
+                    return [.threeMonths, .sixMonths, .nineMonths, .twelveMonths]
+                case "y":
+                    return [.year]
+                default:
+                    return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
+                }
             case .payUpFront:
                 return [.month, .twoMonths, .threeMonths, .sixMonths, .year]
             case .free:

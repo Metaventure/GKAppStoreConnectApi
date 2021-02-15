@@ -197,7 +197,11 @@ public struct ASCOfferCampaign {
         case twelveMonths = "12m"
         case year = "1y"
         
-        public func durationType(subDurationDays days: Int) -> String {
+        public func durationType(subDurationDays days: Int, offerType: OfferType) -> String {
+            if offerType == .free {
+                return rawValue
+            }
+            
             switch days {
             case 7:
                 return "1w"
@@ -214,10 +218,14 @@ public struct ASCOfferCampaign {
             }
         }
         
-        public func numberOfPeriods(subDurationDays days: Int) -> Int {
+        public func numberOfPeriods(subDurationDays days: Int, offerType: OfferType) -> Int {
             var value = rawValue
             value.removeLast()
             let intValue = Int(value)!
+            
+            if offerType == .free {
+                return 1
+            }
             
             switch days {
             case 7:

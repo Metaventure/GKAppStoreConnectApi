@@ -806,11 +806,14 @@ public class GKAppStoreConnectApi {
         
         var countriesJson = [[String: Any]]()
         
+        let durationType = duration.durationType(subDurationDays: subDurationDays, offerType: offerType)
+        let numOfPeriods = duration.numberOfPeriods(subDurationDays: subDurationDays, offerType: offerType)
+        
         for country in ASCCountry.allCountries {
             var countryDict: [String: Any] = [
                 "country": country,
-                "durationType": duration.durationType(subDurationDays: subDurationDays),
-                "numOfPeriods": duration.numberOfPeriods(subDurationDays: subDurationDays),
+                "durationType": durationType,
+                "numOfPeriods": numOfPeriods,
                 "offerModeType": offerType.rawValue
             ]
             

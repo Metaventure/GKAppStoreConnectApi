@@ -689,6 +689,7 @@ public class GKAppStoreConnectApi {
                     // 365
                     // 30
                     // 90?
+                    // 180?
                     iaps.append(ASCAppInternalPurchase(id: adamId, name: name, codesLeft: maximumNumberOfCodes - numberOfCodes, isSubscription: isSubscription, durationDays: durationDays))
                 }
                 
@@ -779,6 +780,7 @@ public class GKAppStoreConnectApi {
                              iapId: Int,
                              name: String,
                              tierStem: String,
+                             subDurationDays: Int,
                              duration: ASCOfferCampaign.Duration,
                              offerType: ASCOfferCampaign.OfferType,
                              newSubscribersEligible: Bool,
@@ -807,8 +809,8 @@ public class GKAppStoreConnectApi {
         for country in ASCCountry.allCountries {
             var countryDict: [String: Any] = [
                 "country": country,
-                "durationType": duration.durationType,
-                "numOfPeriods": duration.numberOfPeriods,
+                "durationType": duration.durationType(subDurationDays: subDurationDays),
+                "numOfPeriods": duration.numberOfPeriods(subDurationDays: subDurationDays),
                 "offerModeType": offerType.rawValue
             ]
             

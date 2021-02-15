@@ -197,26 +197,40 @@ public struct ASCOfferCampaign {
         case twelveMonths = "12m"
         case year = "1y"
         
-        public var durationType: String {
-            let type = rawValue.last!
-            if rawValue != "3m" && type == "m" {
+        public func durationType(subDurationDays days: Int) -> String {
+            switch days {
+            case 7:
+                return "1w"
+            case 30:
+                return "1m"
+            case 90:
+                return "3m"
+            case 180:
+                return "6m"
+            case 365:
+                return "1y"
+            default:
                 return "1\(rawValue.last!)"
-            } else {
-                return rawValue
             }
         }
         
-        public var numberOfPeriods: Int {
-            let type = rawValue.last!
-            if rawValue == "3m" {
-                var value = rawValue
-                value.removeLast()
-                return Int(value)! / 3
-            } else if type == "m" {
-                var value = rawValue
-                value.removeLast()
-                return Int(value)!
-            } else {
+        public func numberOfPeriods(subDurationDays days: Int) -> Int {
+            var value = rawValue
+            value.removeLast()
+            let intValue = Int(value)!
+            
+            switch days {
+            case 7:
+                return intValue
+            case 30:
+                return intValue
+            case 90:
+                return intValue / 3
+            case 180:
+                return intValue / 6
+            case 365:
+                return intValue
+            default:
                 return 1
             }
         }
@@ -274,6 +288,8 @@ public struct ASCOfferCampaign {
                     return [.month, .twoMonths, .threeMonths, .fourMonths, .fiveMonths, .sixMonths, .sevenMonths, .eightMonths, .nineMonths, .tenMonths, .elevenMonths, .twelveMonths]
                 case 90:
                     return [.threeMonths, .sixMonths, .nineMonths, .twelveMonths]
+                case 180:
+                    return [.sixMonths, .twelveMonths]
                 case 365:
                     return [.year]
                 default:
@@ -287,6 +303,8 @@ public struct ASCOfferCampaign {
                     return [.month, .twoMonths, .threeMonths, .sixMonths, .year]
                 case 90:
                     return [.threeMonths, .sixMonths, .nineMonths, .year]
+                case 180:
+                    return [.sixMonths, .twelveMonths]
                 case 365:
                     return [.year]
                 default:

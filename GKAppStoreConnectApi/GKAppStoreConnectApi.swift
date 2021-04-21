@@ -534,18 +534,41 @@ public class GKAppStoreConnectApi {
             do {
                 guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                     let dataDict = dict["data"] as? [String: Any],
-                    let versions = dataDict["versions"] as? [[String: Any]],
-                    let chosenDict = versions.first,
-                    let version = chosenDict["version"] as? String,
-                    let versionId = chosenDict["id"] as? Int,
-                    let contractFilename = chosenDict["contractFileName"] as? String,
-                    let maximumNumberOfCodes = chosenDict["maximumNumberOfCodes"] as? Int,
-                    let numberOfCodes = chosenDict["numberOfCodes"] as? Int else {
+                    let versions = dataDict["versions"] as? [[String: Any]] else {
                     var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
                     unexpectedError.failureReason = String(data: data, encoding: .utf8)
                     completionHandler(nil, unexpectedError)
                         return
                 }
+                
+                var chosenDict: [String: Any]?
+                if versions.count > 1 {
+                    var foundIos = false
+                    for version in versions {
+                        if version["platform"] as? String == "ios" {
+                            chosenDict = version
+                            foundIos = true
+                        }
+                    }
+                    
+                    if !foundIos {
+                        chosenDict = versions.first
+                    }
+                } else {
+                    chosenDict = versions.first
+                }
+                
+                guard let version = chosenDict?["version"] as? String,
+                      let versionId = chosenDict?["id"] as? Int,
+                      let contractFilename = chosenDict?["contractFileName"] as? String,
+                      let maximumNumberOfCodes = chosenDict?["maximumNumberOfCodes"] as? Int,
+                      let numberOfCodes = chosenDict?["numberOfCodes"] as? Int else {
+                    var unexpectedError = UnexpectedReplyError(domain: GK_ERRORDOMAIN_APPSTORECONNECTAPI_PROMOCODES)
+                    unexpectedError.failureReason = String(data: data, encoding: .utf8)
+                    completionHandler(nil, unexpectedError)
+                        return
+                }
+                
                 
                 let codesLeft = maximumNumberOfCodes - numberOfCodes
                 

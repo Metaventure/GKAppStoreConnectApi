@@ -619,7 +619,7 @@ public class GKAppStoreConnectApi {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: jsonArray, options: [])
             req.httpBody = jsonData
-            
+//            NSLog("\(jsonArray)")
             let creationRequestDate = Date(timeIntervalSinceNow: -1)
             
             guard let teamId = teamIdForApp(id: appID) else {
@@ -636,6 +636,9 @@ public class GKAppStoreConnectApi {
                 }
                 
                 do {
+//                    NSLog("\((response as? HTTPURLResponse)?.statusCode)")
+//                    NSLog("\((response as? HTTPURLResponse)?.allHeaderFields)")
+//                    NSLog(String(data: data, encoding: .utf8)!)
                     guard let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                         let dataDict = dict["data"] as? [String: Any],
                         let successfulArray = dataDict["successful"] as? [Any],
@@ -1082,6 +1085,7 @@ public class GKAppStoreConnectApi {
         request.setValue("application/json, text/javascript", forHTTPHeaderField: "Accept")
         request.setValue("keep-alive", forHTTPHeaderField: "Connection")
         request.setValue("Tokens by Gikken", forHTTPHeaderField: "User-Agent")
+        request.setValue("itc", forHTTPHeaderField: "x-csrf-itc")
         
         for (key, value) in additionalFields {
             request.setValue(value, forHTTPHeaderField: key)

@@ -9,7 +9,6 @@
 import Foundation
 
 func debugLog(_ object: Any?) {
-    #if DEBUG
     let string = "\(object ?? "nil")"
     
     // NSLog has a stupid limit on length, but print doesn't appear in device console. Fucking great.
@@ -18,5 +17,4 @@ func debugLog(_ object: Any?) {
     } else {
         NSLog(string)
     }
-    #endif
 }
